@@ -1,11 +1,16 @@
 import express from 'express'
 import cors from 'cors'
-import { pool } from './db.js'
+import cookieParser from 'cookie-parser'
+import { pool, initDb } from './db.js'
+import { loadUser } from './middleware/auth.js'
+import authRoutes from './routes/auth.js'
 
 const app = express()
 
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }))
 app.use(express.json())
+app.use(cookieParser())
+app.use(loadUser)
 
 // เช็กว่าเซิร์ฟเวอร์และฐานข้อมูลทำงานอยู่
 app.get('/api/health', async (req, res) => {
@@ -17,5 +22,10 @@ app.get('/api/health', async (req, res) => {
   }
 })
 
+app.use('/api/auth', authRoutes)
+
 const port = process.env.PORT || 4000
-app.listen(port, () => console.log(`Backend running on http://localhost:${port}`))
+
+initDb().then(() => {
+  app.listen(port, () => console.log(`Backend running on http://localhost:${port}`))
+})
