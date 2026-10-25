@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: lostitem-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lostitem
+      POSTGRES_PASSWORD: lostitem_pw
+      POSTGRES_DB: lostitem
+    ports:
+      - "5432:5432"
+    volumes:
+      - lostitem_pgdata:/var/lib/postgresql/data
+
+volumes:
+  lostitem_pgdata:
