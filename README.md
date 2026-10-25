@@ -59,25 +59,25 @@ npm run dev
 
 ## ตัวแปรใน `backend/.env`
 
-| ตัวแปร         | ความหมาย                      | ค่าตัวอย่าง                                             |
-| -------------- | ----------------------------- | ------------------------------------------------------- |
-| `PORT`         | พอร์ตของ backend              | `4000`                                                  |
-| `DATABASE_URL` | ที่อยู่ฐานข้อมูล              | `postgres://lostitem:lostitem_pw@localhost:5432/lostitem` |
-| `FRONTEND_URL` | ที่อยู่ frontend (ใช้ตั้ง CORS) | `http://localhost:3000`                                 |
-| `JWT_SECRET`   | คีย์ลับสำหรับเซ็น token login | สตริงสุ่มยาว ๆ (ห้ามใช้ค่าตัวอย่างตอนใช้งานจริง)          |
+| ตัวแปร         | ความหมาย                        | ค่าตัวอย่าง                                               |
+| -------------- | ------------------------------- | --------------------------------------------------------- |
+| `PORT`         | พอร์ตของ backend                | `4000`                                                    |
+| `DATABASE_URL` | ที่อยู่ฐานข้อมูล                | `postgres://lostitem:lostitem_pw@localhost:5432/lostitem` |
+| `FRONTEND_URL` | ที่อยู่ frontend (ใช้ตั้ง CORS) | `http://localhost:3000`                                   |
+| `JWT_SECRET`   | คีย์ลับสำหรับเซ็น token login   | สตริงสุ่มยาว ๆ (ห้ามใช้ค่าตัวอย่างตอนใช้งานจริง)          |
 
 > ไฟล์ `.env` ไม่ถูกอัปโหลดขึ้น git ให้ใช้ `.env.example` เป็นแม่แบบ
 > รหัสผ่านฐานข้อมูลใน `docker-compose.yml` เป็นค่าสำหรับพัฒนาในเครื่องเท่านั้น
 
 ## API ที่มีตอนนี้
 
-| Method | Path                 | ทำอะไร                                  | UC    |
-| ------ | -------------------- | --------------------------------------- | ----- |
-| GET    | `/api/health`        | เช็กเซิร์ฟเวอร์และฐานข้อมูล             | –     |
-| POST   | `/api/auth/register` | สมัครสมาชิก (เฉพาะอีเมล `@ru.ac.th`)    | UC_01 |
-| POST   | `/api/auth/login`    | เข้าสู่ระบบ (ตั้ง cookie `token`)       | UC_02 |
-| POST   | `/api/auth/logout`   | ออกจากระบบ                              | UC_02 |
-| GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่                  | –     |
+| Method | Path                 | ทำอะไร                               | UC    |
+| ------ | -------------------- | ------------------------------------ | ----- |
+| GET    | `/api/health`        | เช็กเซิร์ฟเวอร์และฐานข้อมูล          | –     |
+| POST   | `/api/auth/register` | สมัครสมาชิก (เฉพาะอีเมล `@ru.ac.th`) | UC_01 |
+| POST   | `/api/auth/login`    | เข้าสู่ระบบ (ตั้ง cookie `token`)    | UC_02 |
+| POST   | `/api/auth/logout`   | ออกจากระบบ                           | UC_02 |
+| GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่               | –     |
 
 ตัวอย่างสมัครสมาชิก:
 
@@ -86,6 +86,15 @@ curl -X POST http://localhost:4000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"สมชาย ใจดี","email":"somchai@rumail.ru.ac.th","password":"12345678"}'
 ```
+
+## การล็อกอินทำงานอย่างไร
+
+1. หน้า login / register (ฝั่งเบราว์เซอร์) เรียก backend ที่ `http://localhost:4000` backend ตั้ง cookie `token` (JWT)
+2. `frontend/src/app/layout.js` อ่าน cookie นี้ แล้วถาม `/api/auth/me` เพื่อได้ชื่อและ role ส่งให้ Navbar
+3. หน้า `/logout` เรียก `/api/auth/logout` เพื่อล้าง cookie แล้วกลับหน้าแรก
+
+ถ้า backend อยู่คนละที่กับค่าเริ่มต้น ให้สร้าง `frontend/.env.local` แล้วใส่ `NEXT_PUBLIC_API_URL=http://ที่อยู่-backend`
+ต้องเปิดทั้ง frontend และ backend พร้อมกัน ถ้าปิด backend ไว้ Navbar จะแสดงเป็นผู้เยี่ยมชม (ยังไม่ล็อกอิน)
 
 ## Role และการตั้งแอดมินคนแรก
 
@@ -101,18 +110,18 @@ docker exec lostitem-db psql -U lostitem -c \
 
 ## คำสั่งที่ใช้บ่อย
 
-| ทำอะไร                  | คำสั่ง                                         |
-| ----------------------- | ---------------------------------------------- |
-| หยุดฐานข้อมูล           | `docker compose stop`                          |
-| ล้างข้อมูลทั้งหมดในฐานข้อมูล | `docker compose down -v` (ข้อมูลหายถาวร)   |
-| เข้า psql               | `docker exec -it lostitem-db psql -U lostitem` |
-| ตรวจโค้ด frontend       | `cd frontend && npx eslint src`                |
+| ทำอะไร                       | คำสั่ง                                         |
+| ---------------------------- | ---------------------------------------------- |
+| หยุดฐานข้อมูล                | `docker compose stop`                          |
+| ล้างข้อมูลทั้งหมดในฐานข้อมูล | `docker compose down -v` (ข้อมูลหายถาวร)       |
+| เข้า psql                    | `docker exec -it lostitem-db psql -U lostitem` |
+| ตรวจโค้ด frontend            | `cd frontend && npx eslint src`                |
 
 ## ความคืบหน้า
 
 - [x] Frontend: Navbar แยกตาม role และหน้าครบทุกเมนู (ยังเป็นหน้าเปล่า / ข้อมูลตัวอย่าง)
 - [x] Backend: Express + PostgreSQL (Docker)
 - [x] Backend: สมัคร / เข้าสู่ระบบ / ออกจากระบบ (JWT ใน cookie)
-- [ ] Frontend: ต่อหน้า login / register กับ API และส่ง `user` ให้ Navbar
+- [x] Frontend: หน้า login / register / logout ต่อกับ API แล้ว และ Navbar แสดงเมนูตาม role ของผู้ใช้จริง
 - [ ] Backend + Frontend: ลงทะเบียน / จัดการของหาย, ค้นหา, ประชาสัมพันธ์, ส่งมอบ, จัดการผู้ใช้
 - [ ] ตกแต่ง UI ทั้งระบบ
