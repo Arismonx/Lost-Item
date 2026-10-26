@@ -80,4 +80,46 @@ router.get('/me', requireLogin, (req, res) => {
   res.json({ user: { id, name, role } })
 })
 
+// UC_03 ดูข้อมูลบัญชีตัวเอง
+router.get('/profile', requireLogin, async (req, res) => {
+  const { rows } = await pool.query(
+    'SELECT id, name, email, contact, role FROM users WHERE id = $1',
+    [req.user.id]
+  )
+  if (!rows[0]) return res.status(404).json({ error: 'ไม่พบบัญชี' })
+  res.json({ user: rows[0] })
+})
+
+// UC_03 แก้ชื่อ/เบอร์ติดต่อของตัวเอง
+router.patch('/profile', requireLogin, async (req, res) => {
+  const { name, contact } = req.body
+  if (!name?.trim() || !contact?.trim()) {
+    return res.status(400).json({ error: 'กรุณากรอกชื่อและเบอร์ติดต่อ' })
+  }
+  const { rows } = await pool.query(
+    'UPDATE users SET name = $1, contact = $2 WHERE id = $3 RETURNING id, name, email, contact, role',
+    [name.trim(), contact.trim(), req.user.id]
+  )
+  setLoginCookie(res, rows[0]) // ชื่ออยู่ใน token ต้องออกใหม่
+  res.json({ user: rows[0] })
+})
+
+// UC_03 เปลี่ยนรหัสผ่านของตัวเอง
+router.patch('/password', requireLogin, async (req, res) => {
+  const { currentPassword, newPassword } = req.body
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'กรุณากรอกรหัสผ่านให้ครบ' })
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร' })
+  }
+  const { rows } = await pool.query('SELECT password_hash FROM users WHERE id = $1', [req.user.id])
+  if (!rows[0] || !(await bcrypt.compare(currentPassword, rows[0].password_hash))) {
+    return res.status(401).json({ error: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' })
+  }
+  const hash = await bcrypt.hash(newPassword, 10)
+  await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.user.id])
+  res.json({ ok: true })
+})
+
 export default router
