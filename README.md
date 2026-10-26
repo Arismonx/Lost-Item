@@ -78,6 +78,9 @@ npm run dev
 | POST   | `/api/auth/login`    | เข้าสู่ระบบ (ตั้ง cookie `token`)    | UC_02 |
 | POST   | `/api/auth/logout`   | ออกจากระบบ                           | UC_02 |
 | GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่               | –     |
+| GET    | `/api/auth/profile`  | ดูข้อมูลบัญชีตัวเอง (ต้องล็อกอิน)    | UC_03 |
+| PATCH  | `/api/auth/profile`  | แก้ชื่อ/เบอร์ติดต่อของตัวเอง         | UC_03 |
+| PATCH  | `/api/auth/password` | เปลี่ยนรหัสผ่านของตัวเอง             | UC_03 |
 | POST   | `/api/lost-items`    | ลงทะเบียนของหาย (officer, admin)     | UC_04 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
 | GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
@@ -130,5 +133,6 @@ docker exec lostitem-db psql -U lostitem -c \
 - [x] Backend: ตาราง `lost_items` + API ลงทะเบียน/ดูของหาย จำกัดสิทธิ์ officer/admin (ทดสอบด้วย curl แล้ว)
 - [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (ยังไม่มีรูปภาพ)
 - [x] UC_03: แอดมินกำหนด role ผ่านหน้า `/admin/users` + API
+- [x] UC_03: หน้า `/account` ผู้ใช้แก้ชื่อ/เบอร์ติดต่อ และเปลี่ยนรหัสผ่านของตัวเองได้ + API
 - [ ] Backend + Frontend: ลงทะเบียน / จัดการของหาย, ค้นหา, ประชาสัมพันธ์, ส่งมอบ, จัดการผู้ใช้
 - [ ] ตกแต่ง UI ทั้งระบบ
