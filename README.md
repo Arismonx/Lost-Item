@@ -11,7 +11,7 @@ lostitem-return-back/
 │   └── src/
 │       ├── index.js     จุดเริ่มต้นของเซิร์ฟเวอร์
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
-│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js)
+│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, users.js)
 │       └── middleware/  ตรวจ login / role
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
@@ -80,6 +80,8 @@ npm run dev
 | GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่               | –     |
 | POST   | `/api/lost-items`    | ลงทะเบียนของหาย (officer, admin)     | UC_04 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
+| GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
+| PATCH  | `/api/users/:id/role`| กำหนด role เป็น user/officer (admin) | UC_03 |
 
 ตัวอย่างสมัครสมาชิก:
 
@@ -108,7 +110,7 @@ docker exec lostitem-db psql -U lostitem -c \
   "UPDATE users SET role='admin' WHERE email='อีเมลของคุณ@rumail.ru.ac.th'"
 ```
 
-หลังจากนั้นแอดมินกำหนด role ให้คนอื่นผ่านหน้า "จัดการผู้ใช้/Role" ได้ (ยังไม่ทำ)
+หลังจากนั้นแอดมินกำหนด role ให้คนอื่นผ่านหน้า "จัดการผู้ใช้/Role" (`/admin/users`) ได้ โดยตั้งได้เฉพาะ `user` หรือ `officer`
 
 ## คำสั่งที่ใช้บ่อย
 
@@ -127,5 +129,6 @@ docker exec lostitem-db psql -U lostitem -c \
 - [x] Frontend: หน้า login / register / logout ต่อกับ API แล้ว และ Navbar แสดงเมนูตาม role ของผู้ใช้จริง
 - [x] Backend: ตาราง `lost_items` + API ลงทะเบียน/ดูของหาย จำกัดสิทธิ์ officer/admin (ทดสอบด้วย curl แล้ว)
 - [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (ยังไม่มีรูปภาพ)
+- [x] UC_03: แอดมินกำหนด role ผ่านหน้า `/admin/users` + API
 - [ ] Backend + Frontend: ลงทะเบียน / จัดการของหาย, ค้นหา, ประชาสัมพันธ์, ส่งมอบ, จัดการผู้ใช้
 - [ ] ตกแต่ง UI ทั้งระบบ

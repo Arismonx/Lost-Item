@@ -5,6 +5,7 @@ import { pool, initDb } from './db.js'
 import { loadUser } from './middleware/auth.js'
 import authRoutes from './routes/auth.js'
 import lostItemRoutes from './routes/lost-items.js'
+import userRoutes from './routes/users.js'
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.get('/api/health', async (req, res) => {
 
 app.use('/api/auth', authRoutes)
 app.use('/api/lost-items', lostItemRoutes)
+app.use('/api/users', userRoutes)
 
 const port = process.env.PORT || 4000
 
