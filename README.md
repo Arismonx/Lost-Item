@@ -84,7 +84,7 @@ npm run dev
 ```bash
 curl -X POST http://localhost:4000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"สมชาย ใจดี","email":"somchai@rumail.ru.ac.th","password":"12345678"}'
+  -d '{"name":"สมชาย ใจดี","email":"somchai@rumail.ru.ac.th","password":"12345678","contact":"081-234-5678"}'
 ```
 
 ## การล็อกอินทำงานอย่างไร

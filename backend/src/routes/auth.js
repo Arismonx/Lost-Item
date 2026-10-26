@@ -26,8 +26,8 @@ function setLoginCookie(res, user) {
 
 // UC_01 ลงทะเบียน
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body
-  if (!name || !email || !password) {
+  const { name, email, password, contact } = req.body
+  if (!name || !email || !password || !contact) {
     return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบ' })
   }
   if (!RU_MAIL.test(email)) {
@@ -40,8 +40,8 @@ router.post('/register', async (req, res) => {
   const hash = await bcrypt.hash(password, 10)
   try {
     const { rows } = await pool.query(
-      'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, role',
-      [name.trim(), email.toLowerCase(), hash]
+      'INSERT INTO users (name, email, password_hash, contact) VALUES ($1, $2, $3, $4) RETURNING id, name, role',
+      [name.trim(), email.toLowerCase(), hash, contact.trim()]
     )
     setLoginCookie(res, rows[0])
     res.status(201).json({ user: rows[0] })
