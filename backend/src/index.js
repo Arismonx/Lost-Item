@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import { pool, initDb } from './db.js'
 import { loadUser } from './middleware/auth.js'
 import authRoutes from './routes/auth.js'
+import lostItemRoutes from './routes/lost-items.js'
 
 const app = express()
 
@@ -23,6 +24,7 @@ app.get('/api/health', async (req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/lost-items', lostItemRoutes)
 
 const port = process.env.PORT || 4000
 
