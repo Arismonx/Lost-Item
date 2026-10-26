@@ -12,3 +12,10 @@ export async function postJson(path, body) {
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, data };
 }
+
+// ดึงข้อมูลจาก API ฝั่งเบราว์เซอร์ (แนบ cookie ไปด้วย) คืนค่า { ok, data }
+export async function getJson(path) {
+  const res = await fetch(`${API_URL}${path}`, { credentials: 'include' });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}

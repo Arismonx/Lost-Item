@@ -11,7 +11,7 @@ lostitem-return-back/
 │   └── src/
 │       ├── index.js     จุดเริ่มต้นของเซิร์ฟเวอร์
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
-│       ├── routes/      API แยกตามหมวด (auth.js)
+│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js)
 │       └── middleware/  ตรวจ login / role
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
@@ -78,6 +78,8 @@ npm run dev
 | POST   | `/api/auth/login`    | เข้าสู่ระบบ (ตั้ง cookie `token`)    | UC_02 |
 | POST   | `/api/auth/logout`   | ออกจากระบบ                           | UC_02 |
 | GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่               | –     |
+| POST   | `/api/lost-items`    | ลงทะเบียนของหาย (officer, admin)     | UC_04 |
+| GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
 
 ตัวอย่างสมัครสมาชิก:
 
@@ -123,5 +125,7 @@ docker exec lostitem-db psql -U lostitem -c \
 - [x] Backend: Express + PostgreSQL (Docker)
 - [x] Backend: สมัคร / เข้าสู่ระบบ / ออกจากระบบ (JWT ใน cookie)
 - [x] Frontend: หน้า login / register / logout ต่อกับ API แล้ว และ Navbar แสดงเมนูตาม role ของผู้ใช้จริง
+- [x] Backend: ตาราง `lost_items` + API ลงทะเบียน/ดูของหาย จำกัดสิทธิ์ officer/admin (ทดสอบด้วย curl แล้ว)
+- [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (ยังไม่มีรูปภาพ)
 - [ ] Backend + Frontend: ลงทะเบียน / จัดการของหาย, ค้นหา, ประชาสัมพันธ์, ส่งมอบ, จัดการผู้ใช้
 - [ ] ตกแต่ง UI ทั้งระบบ
