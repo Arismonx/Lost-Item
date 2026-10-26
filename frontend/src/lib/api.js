@@ -19,3 +19,15 @@ export async function getJson(path) {
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, data };
 }
+
+// แก้ไขข้อมูลผ่าน API (PATCH) ฝั่งเบราว์เซอร์ คืนค่า { ok, data }
+export async function patchJson(path, body) {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
