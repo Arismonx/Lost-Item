@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
