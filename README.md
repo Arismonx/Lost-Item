@@ -86,6 +86,7 @@ npm run dev
 | POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
 | GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
 | POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
+| POST   | `/api/returns/:id/resolve` | ปิดข้อโต้แย้ง บันทึกผลเจรจา ตั้งของกลับเป็น returned (officer, admin) | UC_09 |
 | GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
 | PATCH  | `/api/users/:id/role`| กำหนด role เป็น user/officer (admin) | UC_03 |
 

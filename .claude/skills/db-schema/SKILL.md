@@ -10,7 +10,7 @@ description: ออกแบบฐานข้อมูลของโปรเ�
 - `users`(id, name, email, password_hash, contact, role[user|officer|admin]) – ไม่มีตาราง Role แยก
 - `lost_items`(id, name, detail, location, found_date, image, status[lost|found|returned|disputed], created_by)
 - `returns`(id, item_id, receiver_name, receiver_contact, sender_name, witness_name, proof_image, officer_id, returned_at) – ผู้รับ/ผู้ส่ง/พยานเป็นข้อความ รองรับคนนอกที่ไม่ได้ลงทะเบียน
-- `disputes`(id, return_id, officer_id, claimant_name, new_detail, new_evidence_image, created_at) – UC_09 กรณีโต้แย้ง ตั้งสถานะของเป็น disputed
+- `disputes`(id, return_id, officer_id, claimant_name, new_detail, new_evidence_image, created_at, resolution, resolved_at) – UC_09 กรณีโต้แย้ง ตั้งสถานะของเป็น disputed; ปิดข้อโต้แย้งแล้วบันทึก resolution/resolved_at และตั้งสถานะกลับเป็น returned; โต้แย้งได้ครั้งเดียวต่อการส่งมอบ
 - `broadcasts`(id, title, description, image, created_by, item_id ว่างได้, created_at)
 - เมธอดในคลาสไดอะแกรม = API route ใน backend ไม่ใช่ข้อมูลในตาราง
 
