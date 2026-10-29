@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { getJson, postJson } from '../../lib/api';
 
 const inputClass = 'w-full rounded border px-3 py-2';
@@ -10,6 +10,7 @@ export default function ReturnsPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [disputeId, setDisputeId] = useState(null); // แถวที่กำลังกรอกข้อโต้แย้ง
+  const [openId, setOpenId] = useState(null); // แถวที่กางดูรายละเอียด
 
   async function load() {
     try {
@@ -86,32 +87,56 @@ export default function ReturnsPage() {
               <tr className="border-b">
                 <th className="py-2">ของ</th>
                 <th>ผู้รับ</th>
-                <th>เจ้าหน้าที่</th>
                 <th>สถานะ</th>
+                <th>การดำเนินการ</th>
               </tr>
             </thead>
             <tbody>
               {returns.map((r) => (
-                <tr key={r.id} className="border-b align-top">
-                  <td className="py-2">{r.item_name}</td>
-                  <td>{r.receiver_name}</td>
-                  <td>{r.officer_name}</td>
-                  <td>
-                    {r.item_status === 'disputed' ? (
-                      'มีข้อโต้แย้ง'
-                    ) : disputeId === r.id ? (
-                      <form onSubmit={(e) => handleDispute(e, r.id)} className="space-y-2 py-1">
-                        <input name="claimant_name" required placeholder="ชื่อผู้โต้แย้ง" className={inputClass} />
-                        <textarea name="new_detail" required placeholder="รายละเอียดที่อ้างเป็นเจ้าของ" className={inputClass} />
-                        <button type="submit" className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700">บันทึก</button>
-                      </form>
-                    ) : (
-                      <button onClick={() => setDisputeId(r.id)} className="text-red-600 underline">
-                        มีผู้โต้แย้ง
+                <Fragment key={r.id}>
+                  <tr className="border-b align-top">
+                    <td className="py-2">{r.item_name}</td>
+                    <td>{r.receiver_name}</td>
+                    <td>{r.item_status === 'disputed' ? 'มีข้อโต้แย้ง' : 'คืนแล้ว'}</td>
+                    <td className="space-x-3">
+                      <button onClick={() => setOpenId(openId === r.id ? null : r.id)} className="text-blue-600 underline">
+                        {openId === r.id ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
                       </button>
-                    )}
-                  </td>
-                </tr>
+                      {r.item_status === 'returned' && (
+                        <button onClick={() => setDisputeId(disputeId === r.id ? null : r.id)} className="text-red-600 underline">
+                          แจ้งข้อโต้แย้ง
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                  {openId === r.id && (
+                    <tr className="border-b bg-gray-50">
+                      <td colSpan={4} className="space-y-1 p-3 text-sm">
+                        <p>ผู้รับคืน: {r.receiver_name} (ติดต่อ: {r.receiver_contact || '-'})</p>
+                        <p>ผู้ส่งมอบ: {r.sender_name || '-'}</p>
+                        <p>พยาน: {r.witness_name || '-'}</p>
+                        <p>เจ้าหน้าที่ที่บันทึก: {r.officer_name}</p>
+                        <p>วันเวลาที่ส่งมอบ: {new Date(r.returned_at).toLocaleString('th-TH')}</p>
+                        {r.claimant_name && (
+                          <p className="text-red-600">
+                            ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail} ({new Date(r.disputed_at).toLocaleString('th-TH')})
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  {disputeId === r.id && (
+                    <tr className="border-b">
+                      <td colSpan={4} className="p-3">
+                        <form onSubmit={(e) => handleDispute(e, r.id)} className="space-y-2">
+                          <input name="claimant_name" required placeholder="ชื่อผู้โต้แย้ง" className={inputClass} />
+                          <textarea name="new_detail" required placeholder="รายละเอียดที่อ้างเป็นเจ้าของ" className={inputClass} />
+                          <button type="submit" className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700">บันทึกข้อโต้แย้ง</button>
+                        </form>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>

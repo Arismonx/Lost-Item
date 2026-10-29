@@ -11,7 +11,7 @@ const MENUS = [
   { href: '/search', label: 'ค้นหาของหาย', roles: ['user', 'officer', 'admin'] }, // UC_06
   { href: '/lost-items/new', label: 'ลงทะเบียนของหาย', roles: ['officer', 'admin'] }, // UC_04
   { href: '/lost-items', label: 'จัดการของหาย', roles: ['officer', 'admin'] }, // UC_05
-  { href: '/returns', label: 'ยืนยันการส่งมอบ', roles: ['officer', 'admin'] }, // UC_09
+  { href: '/returns', label: 'การส่งมอบ', roles: ['officer', 'admin'] }, // UC_09
   { href: '/admin/users', label: 'จัดการผู้ใช้/Role', roles: ['admin'] }, // UC_03 (Admin)
 ];
 

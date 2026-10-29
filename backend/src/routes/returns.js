@@ -45,13 +45,15 @@ router.post('/', staffOnly, async (req, res) => {
   }
 })
 
-// ดูประวัติการส่งมอบทั้งหมด (ใหม่สุดก่อน) พร้อมชื่อของและเจ้าหน้าที่
+// ดูประวัติการส่งมอบทั้งหมด (ใหม่สุดก่อน) พร้อมชื่อของ เจ้าหน้าที่ และข้อโต้แย้ง (ถ้ามี)
 router.get('/', staffOnly, async (req, res) => {
   const { rows } = await pool.query(
-    `SELECT r.*, i.name AS item_name, i.status AS item_status, u.name AS officer_name
+    `SELECT r.*, i.name AS item_name, i.status AS item_status, u.name AS officer_name,
+            d.claimant_name, d.new_detail AS dispute_detail, d.created_at AS disputed_at
      FROM returns r
      JOIN lost_items i ON i.id = r.item_id
      JOIN users u ON u.id = r.officer_id
+     LEFT JOIN disputes d ON d.return_id = r.id
      ORDER BY r.returned_at DESC`
   )
   res.json({ returns: rows })
