@@ -36,4 +36,32 @@ export async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `)
+
+  // ตารางการส่งมอบ (UC_09) ผู้รับ/ผู้ส่ง/พยานเป็นข้อความ รองรับคนนอกที่ไม่ได้ลงทะเบียน
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS returns (
+      id               SERIAL PRIMARY KEY,
+      item_id          INTEGER NOT NULL REFERENCES lost_items(id),
+      receiver_name    TEXT NOT NULL,
+      receiver_contact TEXT NOT NULL DEFAULT '',
+      sender_name      TEXT NOT NULL DEFAULT '',
+      witness_name     TEXT NOT NULL DEFAULT '',
+      proof_image      TEXT,
+      officer_id       INTEGER NOT NULL REFERENCES users(id),
+      returned_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `)
+
+  // ตารางข้อโต้แย้งหลังส่งมอบ (UC_09) เมื่อมีคนอ้างว่าเป็นเจ้าของตัวจริง
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS disputes (
+      id                 SERIAL PRIMARY KEY,
+      return_id          INTEGER NOT NULL REFERENCES returns(id),
+      officer_id         INTEGER NOT NULL REFERENCES users(id),
+      claimant_name      TEXT NOT NULL,
+      new_detail         TEXT NOT NULL,
+      new_evidence_image TEXT,
+      created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `)
 }

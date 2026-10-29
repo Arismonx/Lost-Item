@@ -14,6 +14,7 @@
 - [x] UC_03 กำหนด role: `backend/src/routes/users.js` (GET `/api/users`, PATCH `/api/users/:id/role` เฉพาะ admin, ตั้งได้แค่ user/officer และไม่แตะบัญชี admin) + หน้า `/admin/users` ต่อ API แล้ว (admin คนแรกยังต้องตั้งผ่าน SQL) ทดสอบ curl แล้ว
 - [x] หน้า `/account`: GET/PATCH `/api/auth/profile`, PATCH `/api/auth/password` + หน้าเว็บโหมดดู + ปุ่มแก้ไขข้อมูล/เปลี่ยนรหัสผ่าน (lint ผ่าน ยังไม่ลองในเบราว์เซอร์)
 - [x] แดชบอร์ด officer/admin `/dashboard` (สรุปจำนวนตามสถานะ + ปุ่มลัด, login แล้ว redirect ตาม role, เมนูใน Navbar) lint ยังไม่รัน/ยังไม่ลองในเบราว์เซอร์
-- [ ] ตาราง returns/disputes/broadcasts + API ที่เหลือ, อัปโหลดรูป
+- [x] UC_09 ยืนยันการส่งมอบ: ตาราง returns/disputes (`db.js`), `backend/src/routes/returns.js` (POST/GET `/api/returns`, POST `/api/returns/:id/dispute`) ทดสอบ curl แล้ว + หน้า `/returns` (ฟอร์มส่งมอบ, ประวัติ, ปุ่มโต้แย้ง) lint ผ่าน ยังไม่ลองในเบราว์เซอร์ ยังไม่มีช่องรูปหลักฐาน
+- [ ] ตาราง broadcasts + API ที่เหลือ, อัปโหลดรูป (รวมรูปหลักฐานส่งมอบ/โต้แย้ง)
 - [ ] ตรวจสิทธิ์ role ฝั่งหน้าเว็บ (frontend) ของหน้า officer/admin
 - [ ] (งานเสริมหลังระบบหลักเสร็จ) ลืมรหัสผ่านในหน้า login: ส่งลิงก์รีเซ็ตไป RU Mail (ต้องตั้ง SMTP + token หมดอายุ)

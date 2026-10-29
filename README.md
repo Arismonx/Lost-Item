@@ -11,7 +11,7 @@ lostitem-return-back/
 │   └── src/
 │       ├── index.js     จุดเริ่มต้นของเซิร์ฟเวอร์
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
-│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, users.js)
+│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, returns.js, users.js)
 │       └── middleware/  ตรวจ login / role
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
@@ -83,6 +83,9 @@ npm run dev
 | PATCH  | `/api/auth/password` | เปลี่ยนรหัสผ่านของตัวเอง             | UC_03 |
 | POST   | `/api/lost-items`    | ลงทะเบียนของหาย (officer, admin)     | UC_04 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
+| POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
+| GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
+| POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
 | GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
 | PATCH  | `/api/users/:id/role`| กำหนด role เป็น user/officer (admin) | UC_03 |
 
@@ -93,6 +96,25 @@ curl -X POST http://localhost:4000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"สมชาย ใจดี","email":"somchai@rumail.ru.ac.th","password":"12345678","contact":"081-234-5678"}'
 ```
+
+## Status code ที่ API ตอบกลับ
+
+error ที่ 4xx ตอบเป็น JSON รูปแบบ `{ "error": "ข้อความ" }` (ยกเว้น 500 ที่ Express ตอบหน้า error ธรรมดา และ `/api/health` ตอบ `{ ok, db }`) ส่วนที่สำเร็จจะมีข้อมูลตามชนิด เช่น `{ "item": ... }`
+
+| Code | ความหมาย                 | เกิดเมื่อ                                                                 |
+| ---- | ------------------------ | ------------------------------------------------------------------------- |
+| 200  | OK                       | ดึงข้อมูล/แก้ไข/ออกจากระบบสำเร็จ                                          |
+| 201  | Created                  | สร้างข้อมูลใหม่สำเร็จ (สมัครสมาชิก, ลงทะเบียนของหาย, ส่งมอบ, โต้แย้ง)     |
+| 400  | Bad Request              | กรอกข้อมูลไม่ครบ/รูปแบบไม่ถูก เช่น ไม่ใช่อีเมล RU Mail, รหัสผ่านสั้นไป, วันที่ผิด |
+| 401  | Unauthorized             | ยังไม่ล็อกอิน, token หมดอายุ, อีเมลหรือรหัสผ่านไม่ถูกต้อง                 |
+| 403  | Forbidden                | ล็อกอินแล้วแต่ role ไม่มีสิทธิ์ เช่น user เรียก API ของ officer           |
+| 404  | Not Found                | ไม่พบข้อมูลที่อ้างถึง เช่น ไม่มีของหาย/รายการส่งมอบ/ผู้ใช้ตามรหัสนั้น     |
+| 409  | Conflict                 | ขัดกับสถานะปัจจุบัน เช่น อีเมลถูกใช้แล้ว, ส่งมอบของที่ไม่ใช่ `found`, โต้แย้งซ้ำ |
+| 500  | Internal Server Error    | เซิร์ฟเวอร์/ฐานข้อมูลผิดพลาด (ดู log ที่ terminal ของ backend)             |
+
+วิธีจำ: **4xx = ผู้เรียกทำผิด (แก้ที่ข้อมูลหรือสิทธิ์)**, **5xx = ฝั่งเซิร์ฟเวอร์ผิด**
+
+การเพิ่ม API ใหม่ให้เลือก code ตามนี้: ข้อมูลไม่ครบ → 400, ไม่ล็อกอิน → 401, ไม่มีสิทธิ์ → 403 (ใช้ `requireLogin`/`requireRole` ใน `middleware/auth.js` ให้อยู่แล้ว), หาไม่เจอ → 404, สถานะไม่เหมาะ → 409
 
 ## การล็อกอินทำงานอย่างไร
 
