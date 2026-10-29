@@ -15,7 +15,7 @@ export default function RegisterPage() {
       return setError('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
     }
     const { ok, data } = await postJson('/api/auth/register', {
-      name: form.get('name'),
+      name: `${form.get('firstName').trim()} ${form.get('lastName').trim()}`, // รวมเป็นช่องเดียวตาม DB
       email: form.get('email'),
       password: form.get('password'),
       contact: form.get('contact'),
@@ -30,7 +30,10 @@ export default function RegisterPage() {
       <h1 className="text-2xl font-bold">ลงทะเบียน</h1>
       <p className="text-sm text-gray-500">ใช้ได้เฉพาะอีเมล RU Mail เท่านั้น</p>
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-        <input name="name" required placeholder="ชื่อ-นามสกุล" className="w-full rounded border px-3 py-2" />
+        <div className="flex gap-3">
+          <input name="firstName" required placeholder="ชื่อ" className="w-full rounded border px-3 py-2" />
+          <input name="lastName" required placeholder="นามสกุล" className="w-full rounded border px-3 py-2" />
+        </div>
         <input name="email" type="email" required placeholder="อีเมล RU Mail" className="w-full rounded border px-3 py-2" />
         <input name="contact" required placeholder="ช่องทางติดต่อ (เบอร์โทร / LINE)" className="w-full rounded border px-3 py-2" />
         <input name="password" type="password" required minLength={8} placeholder="รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" className="w-full rounded border px-3 py-2" />
