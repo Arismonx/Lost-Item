@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 // roles: ระบุ role ที่เห็นเมนูนี้ (ไม่ระบุ = ทุกคน), guest = ยังไม่ล็อกอิน/บุคคลภายนอก
 const MENUS = [
   { href: '/', label: 'หน้าแรก' },
+  { href: '/dashboard', label: 'แดชบอร์ด', roles: ['officer', 'admin'] },
   { href: '/broadcast', label: 'ประชาสัมพันธ์' }, // UC_08
   { href: '/contact', label: 'ติดต่อเจ้าหน้าที่' }, // UC_07
   { href: '/search', label: 'ค้นหาของหาย', roles: ['user', 'officer', 'admin'] }, // UC_06

@@ -132,6 +132,7 @@ docker exec lostitem-db psql -U lostitem -c \
 - [x] Frontend: หน้า login / register / logout ต่อกับ API แล้ว และ Navbar แสดงเมนูตาม role ของผู้ใช้จริง
 - [x] Backend: ตาราง `lost_items` + API ลงทะเบียน/ดูของหาย จำกัดสิทธิ์ officer/admin (ทดสอบด้วย curl แล้ว)
 - [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (ยังไม่มีรูปภาพ)
+- [x] Frontend: หน้า `/dashboard` สำหรับ officer/admin (สรุปจำนวนของตามสถานะ + ปุ่มลัด), login แล้วพาไปตาม role
 - [x] UC_03: แอดมินกำหนด role ผ่านหน้า `/admin/users` + API
 - [x] UC_03: หน้า `/account` แสดงข้อมูลบัญชี มีปุ่มแก้ชื่อ/เบอร์ติดต่อ และเปลี่ยนรหัสผ่านของตัวเอง + API
 - [ ] Backend + Frontend: ลงทะเบียน / จัดการของหาย, ค้นหา, ประชาสัมพันธ์, ส่งมอบ, จัดการผู้ใช้

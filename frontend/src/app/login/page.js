@@ -16,7 +16,8 @@ export default function LoginPage() {
       password: form.get('password'),
     });
     if (!ok) return setError(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
-    router.push('/');
+    // officer/admin ไปแดชบอร์ด คนอื่นไปหน้าแรก
+    router.push(['officer', 'admin'].includes(data.user.role) ? '/dashboard' : '/');
     router.refresh(); // ให้ Navbar โหลดข้อมูลผู้ใช้ใหม่
   }
 
