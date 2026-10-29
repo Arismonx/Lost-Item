@@ -1,12 +1,60 @@
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { getJson } from '../../lib/api';
+
 export default function SearchPage() {
+  const [items, setItems] = useState(null);
+  const [error, setError] = useState('');
+
+  async function search(q) {
+    const { ok, data } = await getJson(`/api/lost-items/search?q=${encodeURIComponent(q)}`);
+    if (!ok) return setError(data.error || 'ค้นหาไม่สำเร็จ');
+    setError('');
+    setItems(data.items);
+  }
+
+  // โหลดรายการทั้งหมดตอนเปิดหน้า
+  useEffect(() => {
+    getJson('/api/lost-items/search?q=').then(({ ok, data }) => {
+      if (ok) setItems(data.items);
+      else setError(data.error || 'ค้นหาไม่สำเร็จ');
+    });
+  }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    search(new FormData(e.target).get('q'));
+  }
+
   return (
     <main className="mx-auto max-w-3xl p-6">
       <h1 className="text-2xl font-bold">ค้นหาของหาย</h1>
-      <form className="mt-4 flex gap-2">
-        <input placeholder="ชื่อของ หรือ สถานที่" className="w-full rounded border px-3 py-2" />
+      <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+        <input name="q" placeholder="ชื่อของ หรือ สถานที่" className="w-full rounded border px-3 py-2" />
         <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">ค้นหา</button>
       </form>
-      <p className="mt-4 text-gray-500">ยังไม่มีผลลัพธ์</p>
+
+      {error && (
+        <p className="mt-4 text-sm text-red-600">
+          {error} {error.includes('เข้าสู่ระบบ') && <Link href="/login" className="underline">เข้าสู่ระบบ</Link>}
+        </p>
+      )}
+      {items && items.length === 0 && <p className="mt-4 text-gray-500">ไม่พบของหาย</p>}
+      {items && items.length > 0 && (
+        <p className="mt-4 text-sm text-gray-600">
+          พบของที่ตรงกับของคุณ? <Link href="/contact" className="text-blue-600 underline">ติดต่อเจ้าหน้าที่</Link> พร้อมบัตรประจำตัวเพื่อยืนยันความเป็นเจ้าของ
+        </p>
+      )}
+      <ul className="mt-4 space-y-2">
+        {items?.map((i) => (
+          <li key={i.id} className="rounded border p-3">
+            <div className="font-medium">{i.name}</div>
+            {i.detail && <p className="mt-1 text-sm">{i.detail}</p>}
+            <div className="text-sm text-gray-500">พบที่ {i.location} · {i.found_date}</div>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

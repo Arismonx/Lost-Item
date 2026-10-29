@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { pool } from '../db.js'
-import { requireRole } from '../middleware/auth.js'
+import { requireLogin, requireRole } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -41,6 +41,18 @@ router.post('/', staffOnly, async (req, res) => {
   } finally {
     client.release()
   }
+})
+
+// UC_06 ค้นหาของหาย (ผู้ใช้ที่ล็อกอิน) เห็นเฉพาะของที่ยังรอเจ้าของมารับ ค้นจากชื่อ/สถานที่/รายละเอียด
+router.get('/search', requireLogin, async (req, res) => {
+  const q = (req.query.q || '').trim()
+  const { rows } = await pool.query(
+    `SELECT id, name, detail, location, found_date, image FROM lost_items
+     WHERE status = 'found' AND ($1 = '' OR name ILIKE $2 OR location ILIKE $2 OR detail ILIKE $2)
+     ORDER BY created_at DESC`,
+    [q, `%${q}%`]
+  )
+  res.json({ items: rows })
 })
 
 // UC_05 ดูรายการของหายทั้งหมด (ใหม่สุดก่อน)
