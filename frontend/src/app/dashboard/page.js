@@ -1,4 +1,5 @@
 'use client';
+import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getJson } from '../../lib/api';
@@ -20,6 +21,7 @@ const STATUS_CARDS = [
 ];
 
 export default function DashboardPage() {
+  const allowed = useRequireRole(['officer', 'admin']);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState(null); // null = กำลังโหลด
   const [error, setError] = useState('');
@@ -35,6 +37,8 @@ export default function DashboardPage() {
   }, []);
 
   const count = (status) => items.filter((i) => i.status === status).length;
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

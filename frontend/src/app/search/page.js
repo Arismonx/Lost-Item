@@ -1,9 +1,11 @@
 'use client';
+import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getJson } from '../../lib/api';
 
 export default function SearchPage() {
+  const allowed = useRequireRole(['user', 'officer', 'admin']);
   const [items, setItems] = useState(null);
   const [error, setError] = useState('');
 
@@ -26,6 +28,8 @@ export default function SearchPage() {
     e.preventDefault();
     search(new FormData(e.target).get('q'));
   }
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

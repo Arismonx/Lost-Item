@@ -1,10 +1,12 @@
 'use client';
+import useRequireRole from '../../lib/useRequireRole';
 import { Fragment, useEffect, useState } from 'react';
 import { getJson, postJson } from '../../lib/api';
 
 const inputClass = 'w-full rounded border px-3 py-2';
 
 export default function ReturnsPage() {
+  const allowed = useRequireRole(['officer', 'admin']);
   const [items, setItems] = useState(null); // ของที่รอรับคืน (null = กำลังโหลด)
   const [returns, setReturns] = useState([]); // ประวัติการส่งมอบ
   const [error, setError] = useState('');
@@ -65,6 +67,8 @@ export default function ReturnsPage() {
     setMessage('ปิดข้อโต้แย้งแล้ว');
     load();
   }
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

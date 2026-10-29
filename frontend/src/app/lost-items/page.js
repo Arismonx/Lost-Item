@@ -1,4 +1,5 @@
 'use client';
+import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getJson } from '../../lib/api';
@@ -12,6 +13,7 @@ const STATUS_TEXT = {
 };
 
 export default function LostItemsPage() {
+  const allowed = useRequireRole(['officer', 'admin']);
   const [items, setItems] = useState(null); // null = กำลังโหลด
   const [error, setError] = useState('');
 
@@ -23,6 +25,8 @@ export default function LostItemsPage() {
       })
       .catch(() => setError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'));
   }, []);
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

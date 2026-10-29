@@ -1,8 +1,10 @@
 'use client';
+import useRequireRole from '../../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import { getJson, patchJson } from '../../../lib/api';
 
 export default function AdminUsersPage() {
+  const allowed = useRequireRole(['admin']);
   const [users, setUsers] = useState(null); // null = กำลังโหลด
   const [error, setError] = useState('');
 
@@ -21,6 +23,8 @@ export default function AdminUsersPage() {
     if (!ok) return setError(data.error || 'เปลี่ยน role ไม่สำเร็จ');
     setUsers((list) => list.map((u) => (u.id === id ? data.user : u)));
   }
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

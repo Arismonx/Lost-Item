@@ -142,6 +142,8 @@ docker exec lostitem-db psql -U lostitem -c \
 
 หลังจากนั้นแอดมินกำหนด role ให้คนอื่นผ่านหน้า "จัดการผู้ใช้/Role" (`/admin/users`) ได้ โดยตั้งได้เฉพาะ `user` หรือ `officer`
 
+หน้าเว็บที่จำกัดสิทธิ์ (`/dashboard`, `/lost-items`, `/returns`, `/admin/users`, `/search`, `/account`) ใช้ hook `frontend/src/lib/useRequireRole.js` เช็ค role: ไม่ล็อกอิน → `/login`, role ไม่ตรง → `/`
+
 ## คำสั่งที่ใช้บ่อย
 
 | ทำอะไร                       | คำสั่ง                                         |

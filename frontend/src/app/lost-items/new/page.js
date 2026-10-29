@@ -1,9 +1,11 @@
 'use client';
+import useRequireRole from '../../../lib/useRequireRole';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { postJson } from '../../../lib/api';
 
 export default function NewLostItemPage() {
+  const allowed = useRequireRole(['officer', 'admin']);
   const router = useRouter();
   const [error, setError] = useState('');
 
@@ -20,6 +22,8 @@ export default function NewLostItemPage() {
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     router.push('/lost-items');
   }
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">

@@ -1,11 +1,13 @@
 'use client';
 
+import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import { getJson, patchJson } from '../../lib/api';
 
 const EMPTY_PW = { currentPassword: '', newPassword: '', confirm: '' };
 
 export default function AccountPage() {
+  const allowed = useRequireRole();
   const [profile, setProfile] = useState(null);
   // โหมดของหน้า: 'view' (ดูอย่างเดียว) | 'edit' (แก้ข้อมูล) | 'password' (เปลี่ยนรหัสผ่าน)
   const [mode, setMode] = useState('view');
@@ -63,6 +65,8 @@ export default function AccountPage() {
   if (profile === false) {
     return <main className="mx-auto max-w-3xl p-6">กรุณาเข้าสู่ระบบก่อน</main>;
   }
+
+  if (!allowed) return null;
 
   return (
     <main className="mx-auto max-w-3xl p-6">
