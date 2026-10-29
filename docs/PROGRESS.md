@@ -24,3 +24,4 @@
 - [x] ตรวจสิทธิ์ role ฝั่งหน้าเว็บ: hook `frontend/src/lib/useRequireRole.js` ใช้ใน dashboard, lost-items(+new), returns, admin/users, search, account (ไม่ล็อกอิน→/login, role ไม่ตรง→/) lint ผ่าน ยังไม่ลองในเบราว์เซอร์
 - [ ] (งานเสริมหลังระบบหลักเสร็จ) ลืมรหัสผ่านในหน้า login: ส่งลิงก์รีเซ็ตไป RU Mail (ต้องตั้ง SMTP + token หมดอายุ)
 - [x] หน้า register แยกช่องชื่อ/นามสกุล แล้วรวมเป็น `name` ก่อนส่ง API (DB เหมือนเดิม) lint ผ่าน
+- [x] หน้า `/search` มีปุ่ม "ติดต่อรับของ" ในการ์ดแต่ละชิ้น ลิงก์ไป `/contact?item=ชื่อของ` และ `/contact` แสดงกรอบ "กำลังติดต่อเรื่อง..." lint ผ่าน ยังไม่ลองในเบราว์เซอร์

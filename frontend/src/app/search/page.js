@@ -45,17 +45,19 @@ export default function SearchPage() {
         </p>
       )}
       {items && items.length === 0 && <p className="mt-4 text-gray-500">ไม่พบของหาย</p>}
-      {items && items.length > 0 && (
-        <p className="mt-4 text-sm text-gray-600">
-          พบของที่ตรงกับของคุณ? <Link href="/contact" className="text-blue-600 underline">ติดต่อเจ้าหน้าที่</Link> พร้อมบัตรประจำตัวเพื่อยืนยันความเป็นเจ้าของ
-        </p>
-      )}
       <ul className="mt-4 space-y-2">
         {items?.map((i) => (
           <li key={i.id} className="rounded border p-3">
             <div className="font-medium">{i.name}</div>
             {i.detail && <p className="mt-1 text-sm">{i.detail}</p>}
             <div className="text-sm text-gray-500">พบที่ {i.location} · {i.found_date}</div>
+            <Link
+              href={`/contact?item=${encodeURIComponent(i.name)}`}
+              className="mt-2 inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              ติดต่อรับของ
+            </Link>
+            <p className="mt-1 text-xs text-gray-500">พกบัตรประจำตัวเพื่อยืนยันความเป็นเจ้าของ</p>
           </li>
         ))}
       </ul>

@@ -8,14 +8,25 @@ const PICKUP_TIME = 'ติดต่อเจ้าหน้าที่เพ�
 
 export default function ContactPage() {
   const [officers, setOfficers] = useState(null);
+  const [itemName, setItemName] = useState(''); // ชื่อของจาก ?item= (มาจากปุ่มในหน้าค้นหา)
 
   useEffect(() => {
-    getJson('/api/contact/officers').then(({ ok, data }) => setOfficers(ok ? data.officers : []));
+    getJson('/api/contact/officers').then(({ ok, data }) => {
+      setItemName(new URLSearchParams(window.location.search).get('item') || '');
+      setOfficers(ok ? data.officers : []);
+    });
   }, []);
 
   return (
     <main className="mx-auto max-w-3xl p-6">
       <h1 className="text-2xl font-bold">ติดต่อเจ้าหน้าที่</h1>
+
+      {itemName && (
+        <section className="mt-4 rounded border border-blue-300 bg-blue-50 p-3">
+          <div>คุณกำลังติดต่อเรื่อง: <span className="font-semibold">{itemName}</span></div>
+          <p className="text-sm text-gray-600">กรุณาแจ้งชื่อของนี้กับเจ้าหน้าที่ และพกบัตรประจำตัวมาด้วย</p>
+        </section>
+      )}
 
       <section className="mt-4 rounded border p-3">
         <div className="font-medium">รับของหาย</div>
