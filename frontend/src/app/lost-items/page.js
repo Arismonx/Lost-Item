@@ -41,7 +41,8 @@ export default function LostItemsPage() {
         <table className="mt-4 w-full text-left">
           <thead>
             <tr className="border-b">
-              <th className="py-2">ชื่อ</th>
+              <th className="py-2">ID</th>
+              <th>ชื่อ</th>
               <th>สถานที่</th>
               <th>วันที่พบ</th>
               <th>สถานะ</th>
@@ -50,7 +51,8 @@ export default function LostItemsPage() {
           <tbody>
             {items.map((i) => (
               <tr key={i.id} className="border-b">
-                <td className="py-2">{i.name}</td>
+                <td className="py-2">{i.id}</td>
+                <td>{i.name}</td>
                 <td>{i.location}</td>
                 <td>{i.found_date}</td>
                 <td>{STATUS_TEXT[i.status] || i.status}</td>
