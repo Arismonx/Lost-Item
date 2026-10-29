@@ -61,4 +61,46 @@ router.get('/', staffOnly, async (req, res) => {
   res.json({ items: rows })
 })
 
+// UC_05 แก้ไขของหาย (แก้ได้เฉพาะที่ยังรอรับคืน) แก้ข้อความประชาสัมพันธ์ที่ผูกอยู่ให้ตรงกันด้วย
+router.patch('/:id', staffOnly, async (req, res) => {
+  const { name, detail, location, found_date } = req.body
+  if (!name?.trim() || !location?.trim() || !found_date) {
+    return res.status(400).json({ error: 'กรุณากรอกชื่อของ สถานที่พบ และวันที่พบ' })
+  }
+
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const found = await client.query('SELECT status FROM lost_items WHERE id = $1 FOR UPDATE', [req.params.id])
+    if (found.rowCount === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'ไม่พบของหายนี้' })
+    }
+    if (found.rows[0].status !== 'found') {
+      await client.query('ROLLBACK')
+      return res.status(409).json({ error: 'แก้ไขได้เฉพาะของที่ยังรอรับคืน' })
+    }
+    const { rows } = await client.query(
+      `UPDATE lost_items SET name = $1, detail = $2, location = $3, found_date = $4
+       WHERE id = $5 RETURNING *`,
+      [name.trim(), (detail || '').trim(), location.trim(), found_date, req.params.id]
+    )
+    const item = rows[0]
+    await client.query(
+      'UPDATE broadcasts SET title = $1, description = $2 WHERE item_id = $3',
+      [`พบ ${item.name}`, `ที่${item.location}`, item.id]
+    )
+    await client.query('COMMIT')
+    res.json({ item })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    if (err.code === '22007' || err.code === '22008') {
+      return res.status(400).json({ error: 'รูปแบบวันที่ไม่ถูกต้อง' })
+    }
+    throw err
+  } finally {
+    client.release()
+  }
+})
+
 export default router

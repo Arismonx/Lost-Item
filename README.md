@@ -84,6 +84,7 @@ npm run dev
 | POST   | `/api/lost-items`    | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) | UC_04 |
 | GET    | `/api/lost-items/search?q=` | ค้นหาของหายที่รอเจ้าของมารับ (ต้องล็อกอิน) | UC_06 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
+| PATCH  | `/api/lost-items/:id` | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found) + แก้ประชาสัมพันธ์ที่ผูกอยู่ | UC_05 |
 | POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
 | GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
 | POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
