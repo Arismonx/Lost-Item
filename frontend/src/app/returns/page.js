@@ -11,6 +11,7 @@ export default function ReturnsPage() {
   const [message, setMessage] = useState('');
   const [disputeId, setDisputeId] = useState(null); // แถวที่กำลังกรอกข้อโต้แย้ง
   const [openId, setOpenId] = useState(null); // แถวที่กางดูรายละเอียด
+  const [resolveId, setResolveId] = useState(null); // แถวที่กำลังกรอกผลการเจรจา
 
   async function load() {
     try {
@@ -50,6 +51,18 @@ export default function ReturnsPage() {
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     setDisputeId(null);
     setMessage('บันทึกข้อโต้แย้งแล้ว');
+    load();
+  }
+
+  async function handleResolve(e, returnId) {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    const form = new FormData(e.target);
+    const { ok, data } = await postJson(`/api/returns/${returnId}/resolve`, Object.fromEntries(form));
+    if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
+    setResolveId(null);
+    setMessage('ปิดข้อโต้แย้งแล้ว');
     load();
   }
 
@@ -102,9 +115,14 @@ export default function ReturnsPage() {
                       <button onClick={() => setOpenId(openId === r.id ? null : r.id)} className="text-blue-600 underline">
                         {openId === r.id ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
                       </button>
-                      {r.item_status === 'returned' && (
+                      {r.item_status === 'returned' && !r.claimant_name && (
                         <button onClick={() => setDisputeId(disputeId === r.id ? null : r.id)} className="text-red-600 underline">
                           แจ้งข้อโต้แย้ง
+                        </button>
+                      )}
+                      {r.item_status === 'disputed' && (
+                        <button onClick={() => setResolveId(resolveId === r.id ? null : r.id)} className="text-green-700 underline">
+                          ปิดข้อโต้แย้ง
                         </button>
                       )}
                     </td>
@@ -122,6 +140,24 @@ export default function ReturnsPage() {
                             ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail} ({new Date(r.disputed_at).toLocaleString('th-TH')})
                           </p>
                         )}
+                        {r.resolved_at && (
+                          <p className="text-green-700">
+                            ผลการเจรจา: {r.resolution} ({new Date(r.resolved_at).toLocaleString('th-TH')})
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  {resolveId === r.id && (
+                    <tr className="border-b">
+                      <td colSpan={4} className="p-3">
+                        <form onSubmit={(e) => handleResolve(e, r.id)} className="space-y-2">
+                          <p className="text-sm text-red-600">
+                            ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail}
+                          </p>
+                          <textarea name="resolution" required placeholder="ผลการเจรจา เช่น ผู้รับเดิมเป็นเจ้าของจริง" className={inputClass} />
+                          <button type="submit" className="rounded bg-green-700 px-3 py-1 text-white hover:bg-green-800">บันทึกและปิดข้อโต้แย้ง</button>
+                        </form>
                       </td>
                     </tr>
                   )}

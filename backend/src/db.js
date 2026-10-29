@@ -64,4 +64,7 @@ export async function initDb() {
       created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `)
+  // ผลการเจรจาตอนปิดข้อโต้แย้ง (ยังว่างอยู่ = ยังไม่จบเรื่อง)
+  await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolution TEXT`)
+  await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ`)
 }

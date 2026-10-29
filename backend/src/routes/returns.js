@@ -49,7 +49,7 @@ router.post('/', staffOnly, async (req, res) => {
 router.get('/', staffOnly, async (req, res) => {
   const { rows } = await pool.query(
     `SELECT r.*, i.name AS item_name, i.status AS item_status, u.name AS officer_name,
-            d.claimant_name, d.new_detail AS dispute_detail, d.created_at AS disputed_at
+            d.claimant_name, d.new_detail AS dispute_detail, d.created_at AS disputed_at, d.resolution, d.resolved_at
      FROM returns r
      JOIN lost_items i ON i.id = r.item_id
      JOIN users u ON u.id = r.officer_id
@@ -78,7 +78,9 @@ router.post('/:id/dispute', staffOnly, async (req, res) => {
       await client.query('ROLLBACK')
       return res.status(404).json({ error: 'ไม่พบรายการส่งมอบนี้' })
     }
-    if (found[0].status !== 'returned') {
+    // โต้แย้งได้ครั้งเดียวต่อการส่งมอบ (ปิดข้อโต้แย้งแล้วก็โต้แย้งซ้ำไม่ได้)
+    const { rowCount } = await client.query('SELECT 1 FROM disputes WHERE return_id = $1', [req.params.id])
+    if (found[0].status !== 'returned' || rowCount > 0) {
       await client.query('ROLLBACK')
       return res.status(409).json({ error: 'รายการนี้ถูกโต้แย้งไปแล้ว' })
     }
@@ -90,6 +92,47 @@ router.post('/:id/dispute', staffOnly, async (req, res) => {
     await client.query("UPDATE lost_items SET status = 'disputed' WHERE id = $1", [found[0].item_id])
     await client.query('COMMIT')
     res.status(201).json({ dispute: rows[0] })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    if (err.code === '22P02') return res.status(400).json({ error: 'รหัสการส่งมอบไม่ถูกต้อง' })
+    throw err
+  } finally {
+    client.release()
+  }
+})
+
+// UC_09 ปิดข้อโต้แย้ง: บันทึกผลการเจรจา แล้วตั้งสถานะของกลับเป็น returned (ข้อโต้แย้งเดิมยังเก็บไว้เป็นประวัติ)
+router.post('/:id/resolve', staffOnly, async (req, res) => {
+  const { resolution } = req.body
+  if (!resolution?.trim()) {
+    return res.status(400).json({ error: 'กรุณากรอกผลการเจรจา' })
+  }
+
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    // ล็อกแถวของไว้ กันสองคนกดปิดข้อโต้แย้งพร้อมกัน
+    const { rows: found } = await client.query(
+      `SELECT r.item_id, i.status FROM returns r JOIN lost_items i ON i.id = r.item_id
+       WHERE r.id = $1 FOR UPDATE OF i`,
+      [req.params.id]
+    )
+    if (found.length === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'ไม่พบรายการส่งมอบนี้' })
+    }
+    if (found[0].status !== 'disputed') {
+      await client.query('ROLLBACK')
+      return res.status(409).json({ error: 'รายการนี้ไม่มีข้อโต้แย้งที่รอปิด' })
+    }
+    const { rows } = await client.query(
+      `UPDATE disputes SET resolution = $1, resolved_at = now()
+       WHERE return_id = $2 AND resolved_at IS NULL RETURNING *`,
+      [resolution.trim(), req.params.id]
+    )
+    await client.query("UPDATE lost_items SET status = 'returned' WHERE id = $1", [found[0].item_id])
+    await client.query('COMMIT')
+    res.json({ dispute: rows[0] })
   } catch (err) {
     await client.query('ROLLBACK')
     if (err.code === '22P02') return res.status(400).json({ error: 'รหัสการส่งมอบไม่ถูกต้อง' })
