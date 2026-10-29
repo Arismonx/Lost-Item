@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { getJson } from '../../lib/api';
 
 // แก้ข้อความสถานที่/เวลารับของตรงนี้ให้ตรงกับของจริง
-const PICKUP_PLACE = 'ภาควิชาวิทยาการคอมพิวเตอร์ มหาวิทยาลัยรามคำแหง';
-const PICKUP_TIME = 'ติดต่อเจ้าหน้าที่เพื่อนัดเวลา';
+const PICKUP_PLACE = 'ภาควิชาวิทยาการคอมพิวเตอร์ มหาวิทยาลัยรามคำแหง ชั้น 2 ห้องธุรการ';
+const PICKUP_TIME = 'ติดต่อเจ้าหน้าที่ ณ เวลาทำการ: วันจันทร์ - วันศุกร์ เวลา 8:30 - 16:00 น.';
 
 export default function ContactPage() {
   const [officers, setOfficers] = useState(null);
@@ -31,7 +31,7 @@ export default function ContactPage() {
       <section className="mt-4 rounded border p-3">
         <div className="font-medium">รับของหาย</div>
         <p className="mt-1 text-sm">สถานที่: {PICKUP_PLACE}</p>
-        <p className="text-sm">เวลา: {PICKUP_TIME}</p>
+        <p className="text-sm">{PICKUP_TIME}</p>
         <p className="mt-1 text-sm text-gray-500">โปรดนำบัตรประจำตัวมาเพื่อยืนยันความเป็นเจ้าของ</p>
       </section>
 
