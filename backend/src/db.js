@@ -67,4 +67,17 @@ export async function initDb() {
   // ผลการเจรจาตอนปิดข้อโต้แย้ง (ยังว่างอยู่ = ยังไม่จบเรื่อง)
   await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolution TEXT`)
   await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ`)
+
+  // ตารางประชาสัมพันธ์ (UC_08) item_id ว่างได้ = ประกาศทั่วไปที่ไม่ผูกกับของชิ้นใด
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS broadcasts (
+      id          SERIAL PRIMARY KEY,
+      title       TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      image       TEXT,
+      item_id     INTEGER REFERENCES lost_items(id),
+      created_by  INTEGER NOT NULL REFERENCES users(id),
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `)
 }

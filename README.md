@@ -11,7 +11,7 @@ lostitem-return-back/
 │   └── src/
 │       ├── index.js     จุดเริ่มต้นของเซิร์ฟเวอร์
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
-│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, returns.js, users.js)
+│       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, returns.js, users.js, broadcasts.js)
 │       └── middleware/  ตรวจ login / role
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
@@ -81,12 +81,14 @@ npm run dev
 | GET    | `/api/auth/profile`  | ดูข้อมูลบัญชีตัวเอง (ต้องล็อกอิน)    | UC_03 |
 | PATCH  | `/api/auth/profile`  | แก้ชื่อ/เบอร์ติดต่อของตัวเอง         | UC_03 |
 | PATCH  | `/api/auth/password` | เปลี่ยนรหัสผ่านของตัวเอง             | UC_03 |
-| POST   | `/api/lost-items`    | ลงทะเบียนของหาย (officer, admin)     | UC_04 |
+| POST   | `/api/lost-items`    | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) | UC_04 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
 | POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
 | GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
 | POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
 | POST   | `/api/returns/:id/resolve` | ปิดข้อโต้แย้ง บันทึกผลเจรจา ตั้งของกลับเป็น returned (officer, admin) | UC_09 |
+| GET    | `/api/broadcasts`    | ดูประชาสัมพันธ์ (ทุกคน)              | UC_08 |
+| POST   | `/api/broadcasts`    | ส่งประชาสัมพันธ์ (officer, admin)    | UC_08 |
 | GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
 | PATCH  | `/api/users/:id/role`| กำหนด role เป็น user/officer (admin) | UC_03 |
 

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import { pool, initDb } from './db.js'
 import { loadUser } from './middleware/auth.js'
 import authRoutes from './routes/auth.js'
+import broadcastRoutes from './routes/broadcasts.js'
 import lostItemRoutes from './routes/lost-items.js'
 import returnRoutes from './routes/returns.js'
 import userRoutes from './routes/users.js'
@@ -26,6 +27,7 @@ app.get('/api/health', async (req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/broadcasts', broadcastRoutes)
 app.use('/api/lost-items', lostItemRoutes)
 app.use('/api/returns', returnRoutes)
 app.use('/api/users', userRoutes)

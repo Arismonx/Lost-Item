@@ -16,6 +16,8 @@
 - [x] แดชบอร์ด officer/admin `/dashboard` (สรุปจำนวนตามสถานะ + ปุ่มลัด, login แล้ว redirect ตาม role, เมนูใน Navbar) lint ยังไม่รัน/ยังไม่ลองในเบราว์เซอร์
 - [x] UC_09 ยืนยันการส่งมอบ: ตาราง returns/disputes (`db.js`), `backend/src/routes/returns.js` (POST/GET `/api/returns`, POST `/api/returns/:id/dispute`) ทดสอบ curl แล้ว + หน้า `/returns` (ฟอร์มส่งมอบ, ประวัติ, ปุ่มโต้แย้ง) lint ผ่าน ยังไม่ลองในเบราว์เซอร์ ยังไม่มีช่องรูปหลักฐาน
 - [x] UC_09 ปิดข้อโต้แย้ง: `disputes.resolution/resolved_at` (ALTER ใน `db.js`), POST `/api/returns/:id/resolve` ทดสอบ curl แล้ว + หน้า `/returns` มีปุ่มปิดข้อโต้แย้ง/แสดงผลเจรจา, คอลัมน์สถานะแยกจากปุ่ม + ปุ่มดูรายละเอียด lint ผ่าน ยังไม่ลองในเบราว์เซอร์
-- [ ] ตาราง broadcasts + API ที่เหลือ, อัปโหลดรูป (รวมรูปหลักฐานส่งมอบ/โต้แย้ง)
+- [x] UC_08 ประชาสัมพันธ์: ตาราง `broadcasts` (`db.js`), `backend/src/routes/broadcasts.js` (GET ทุกคน, POST officer/admin) ทดสอบ curl แล้ว + หน้า `/broadcast` แสดงรายการ/ฟอร์มส่งสำหรับ officer/admin lint ยังไม่รัน ยังไม่ลองในเบราว์เซอร์ ยังไม่มีช่องรูป
+- [x] ลงทะเบียนของหาย (`POST /api/lost-items`) สร้างประชาสัมพันธ์อัตโนมัติทุกครั้ง (transaction เดียวกัน, ผูก `item_id`) + หน้า `/broadcast` ใช้ปุ่ม "เพิ่มประชาสัมพันธ์" แล้วค่อยแสดงฟอร์ม ทดสอบ curl แล้ว
+- [ ] อัปโหลดรูป (รวมรูปหลักฐานส่งมอบ/โต้แย้ง)
 - [ ] ตรวจสิทธิ์ role ฝั่งหน้าเว็บ (frontend) ของหน้า officer/admin
 - [ ] (งานเสริมหลังระบบหลักเสร็จ) ลืมรหัสผ่านในหน้า login: ส่งลิงก์รีเซ็ตไป RU Mail (ต้องตั้ง SMTP + token หมดอายุ)
