@@ -23,8 +23,12 @@
 - [x] อัปโหลดรูปของหาย (รอบ 1): `middleware/upload.js` (multer, JPG/PNG/WebP ≤5MB, ชื่อไฟล์สุ่ม, เก็บ `backend/uploads/items`, เสิร์ฟ `/uploads/items`) POST/PATCH `/api/lost-items` รับ multipart ช่อง `image`, ประชาสัมพันธ์ใช้รูปเดียวกัน; หน้า new/popup แก้ไข/search/broadcast/lost-items ต่อแล้ว ทดสอบ curl แล้ว lint ผ่าน ยังไม่ลองในเบราว์เซอร์
 - [x] อัปโหลดรูปหลักฐานส่งมอบ/โต้แย้ง (รอบ 2): POST `/api/returns` และ `/api/returns/:id/dispute` รับ multipart ช่อง `image` (เก็บ `backend/uploads/evidence`, ลบไฟล์ทิ้งถ้า request ไม่ผ่าน), เสิร์ฟผ่าน GET `/api/returns/images/:name` เฉพาะ officer/admin; หน้า `/returns` มีช่องเลือกรูปและแสดงรูปในรายละเอียด ทดสอบ curl แล้ว (officer 200 / user 403 / guest 401 / path สาธารณะ 404) lint ผ่าน ยังไม่ลองในเบราว์เซอร์
 - [x] ตรวจสิทธิ์ role ฝั่งหน้าเว็บ: hook `frontend/src/lib/useRequireRole.js` ใช้ใน dashboard, lost-items(+new), returns, admin/users, search, account (ไม่ล็อกอิน→/login, role ไม่ตรง→/) lint ผ่าน ยังไม่ลองในเบราว์เซอร์
-- [ ] (งานเสริมหลังระบบหลักเสร็จ) ลืมรหัสผ่านในหน้า login: ส่งลิงก์รีเซ็ตไป RU Mail (ต้องตั้ง SMTP + token หมดอายุ)
+- [-] ลืมรหัสผ่านทางอีเมล: ไม่ใช้ใน branch นี้ (ยกเลิก) เปลี่ยนเป็นแบบแอดมินรีเซ็ตให้ ดูรายการ "ขั้นต่อไป" ด้านล่าง
 - [x] หน้า register แยกช่องชื่อ/นามสกุล แล้วรวมเป็น `name` ก่อนส่ง API (DB เหมือนเดิม) lint ผ่าน
 - [x] หน้า `/search` มีปุ่ม "ติดต่อรับของ" ในการ์ดแต่ละชิ้น ลิงก์ไป `/contact?item=ชื่อของ` และ `/contact` แสดงกรอบ "กำลังติดต่อเรื่อง..." lint ผ่าน ยังไม่ลองในเบราว์เซอร์
 - [x] หน้า `/lost-items` เพิ่มคอลัมน์ ID lint ผ่าน
 - [x] แก้ไขของหาย: PATCH `/api/lost-items/:id` (officer/admin, แก้ได้เฉพาะสถานะ found, แก้ประกาศที่ผูกอยู่ด้วย) ทดสอบ curl แล้ว + ปุ่มแก้ไข (popup) ที่หน้า `/lost-items` lint ผ่าน ยังไม่ลองในเบราว์เซอร์
+- [x] อัปโหลดรูปของหาย (รอบ 1) และรูปหลักฐานส่งมอบ/โต้แย้ง (รอบ 2) เสร็จ (ผู้ใช้ทดสอบแล้วใช้งานได้)
+- [x] แตก branch `ui-work` จาก `0ff1f40` เพื่อทำ UI ต่อ โดยไม่เอาลืมรหัสผ่านทางอีเมล (เก็บไว้ที่ `main` + tag `v1-with-email-reset`)
+- [ ] กำลังทำ: ปรับ UI บน `ui-work` (รอระบุว่าหน้าไหนก่อน)
+- [ ] ขั้นต่อไป: ลืมรหัสผ่านแบบแอดมินรีเซ็ตให้ที่ `/admin/users` (PATCH `/api/users/:id/password` + ปุ่ม) ยังไม่ได้ทำ
