@@ -65,6 +65,7 @@ npm run dev
 | `PORT`         | พอร์ตของ backend                | `4000`                                                    |
 | `DATABASE_URL` | ที่อยู่ฐานข้อมูล                | `postgres://lostitem:lostitem_pw@localhost:5432/lostitem` |
 | `FRONTEND_URL` | ที่อยู่ frontend (ใช้ตั้ง CORS) | `http://localhost:3000`                                   |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | ตั้งค่าส่งอีเมล (ลืมรหัสผ่าน) ไม่บังคับ | ถ้าไม่ตั้ง `SMTP_HOST` ลิงก์รีเซ็ตจะพิมพ์ในคอนโซลของ backend แทน (ใช้ตอนพัฒนา) |
 | `JWT_SECRET`   | คีย์ลับสำหรับเซ็น token login   | สตริงสุ่มยาว ๆ (ห้ามใช้ค่าตัวอย่างตอนใช้งานจริง)          |
 
 > ไฟล์ `.env` ไม่ถูกอัปโหลดขึ้น git ให้ใช้ `.env.example` เป็นแม่แบบ
@@ -95,6 +96,8 @@ npm run dev
 | POST   | `/api/broadcasts`           | ส่งประชาสัมพันธ์ (officer, admin)                                                                                                            | UC_08 |
 | GET    | `/api/contact/officers`     | รายชื่อ/เบอร์ติดต่อเจ้าหน้าที่ (ทุกคน)                                                                                                       | UC_07 |
 | GET    | `/api/users`                | ดูผู้ใช้ทั้งหมด (admin)                                                                                                                      | UC_03 |
+| POST   | `/api/auth/forgot-password` | ขอลิงก์ตั้งรหัสผ่านใหม่ทางอีเมล (ตอบเหมือนกันทุกอีเมล) | – |
+| POST   | `/api/auth/reset-password`  | ตั้งรหัสผ่านใหม่ด้วย token จากอีเมล (30 นาที ใช้ครั้งเดียว) | – |
 | PATCH  | `/api/users/:id/role`       | กำหนด role เป็น user/officer (admin)                                                                                                         | UC_03 |
 
 ตัวอย่างสมัครสมาชิก:

@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import crypto from 'node:crypto'
 import { pool } from '../db.js'
 import { requireLogin } from '../middleware/auth.js'
+import { sendMail } from '../mailer.js'
 
 const router = Router()
 
@@ -120,6 +122,83 @@ router.patch('/password', requireLogin, async (req, res) => {
   const hash = await bcrypt.hash(newPassword, 10)
   await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.user.id])
   res.json({ ok: true })
+})
+
+// ลืมรหัสผ่าน: ส่งลิงก์รีเซ็ตไปอีเมล (หมดอายุใน 30 นาที ใช้ได้ครั้งเดียว)
+// ตอบข้อความเดียวกันเสมอ ไม่ว่าอีเมลจะมีในระบบหรือไม่ เพื่อไม่ให้คนนอกใช้เดาว่าใครสมัครไว้
+const RESET_MINUTES = 30
+const RESET_COOLDOWN_SECONDS = 60
+const sha256 = (v) => crypto.createHash('sha256').update(v).digest('hex')
+
+router.post('/forgot-password', async (req, res) => {
+  const email = (req.body.email || '').trim().toLowerCase()
+  if (!email) return res.status(400).json({ error: 'กรุณากรอกอีเมล' })
+
+  const done = () => res.json({ ok: true, message: 'ถ้าอีเมลนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว' })
+
+  const { rows } = await pool.query('SELECT id FROM users WHERE email = $1', [email])
+  if (rows.length === 0) return done()
+
+  // ขอถี่เกินไป (ภายใน 1 นาที) ไม่ส่งซ้ำ กันคนยิงอีเมลรัว
+  const recent = await pool.query(
+    `SELECT 1 FROM password_resets WHERE user_id = $1 AND created_at > now() - make_interval(secs => $2)`,
+    [rows[0].id, RESET_COOLDOWN_SECONDS]
+  )
+  if (recent.rowCount > 0) return done()
+
+  const token = crypto.randomBytes(32).toString('hex')
+  // ลิงก์เก่าที่ยังไม่ได้ใช้ถือว่าใช้ไม่ได้อีก (เหลือลิงก์ล่าสุดอันเดียว)
+  await pool.query('DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL', [rows[0].id])
+  await pool.query(
+    `INSERT INTO password_resets (user_id, token_hash, expires_at)
+     VALUES ($1, $2, now() + make_interval(mins => $3))`,
+    [rows[0].id, sha256(token), RESET_MINUTES]
+  )
+
+  try {
+    await sendMail({
+      to: email,
+      subject: 'ตั้งรหัสผ่านใหม่ - ของหายแล้วได้คืน',
+      text: `กดลิงก์เพื่อตั้งรหัสผ่านใหม่ (หมดอายุใน ${RESET_MINUTES} นาที ใช้ได้ครั้งเดียว)\n${process.env.FRONTEND_URL}/reset-password?token=${token}\n\nถ้าคุณไม่ได้ขอ ให้ละเว้นอีเมลนี้`,
+    })
+  } catch (err) {
+    console.error('ส่งอีเมลรีเซ็ตรหัสผ่านไม่สำเร็จ:', err.message) // ไม่บอกผู้ใช้ เพื่อไม่ให้รู้ว่าอีเมลมีในระบบ
+  }
+  done()
+})
+
+// ตั้งรหัสผ่านใหม่ด้วยโทเค็นจากอีเมล
+router.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body
+  if (!token || !password) return res.status(400).json({ error: 'ข้อมูลไม่ครบ' })
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร' })
+  }
+
+  const hash = await bcrypt.hash(password, 10)
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    // ล็อกแถวโทเค็น กันสองคำขอใช้โทเค็นเดียวกันพร้อมกัน
+    const { rows } = await client.query(
+      `SELECT id, user_id FROM password_resets
+       WHERE token_hash = $1 AND used_at IS NULL AND expires_at > now() FOR UPDATE`,
+      [sha256(String(token))]
+    )
+    if (rows.length === 0) {
+      await client.query('ROLLBACK')
+      return res.status(400).json({ error: 'ลิงก์ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอลิงก์ใหม่' })
+    }
+    await client.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, rows[0].user_id])
+    await client.query('UPDATE password_resets SET used_at = now() WHERE id = $1', [rows[0].id])
+    await client.query('COMMIT')
+    res.json({ ok: true })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    throw err
+  } finally {
+    client.release()
+  }
 })
 
 export default router
