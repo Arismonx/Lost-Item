@@ -1,9 +1,31 @@
 'use client';
 import useRequireRole from '../../lib/useRequireRole';
 import { Fragment, useEffect, useState } from 'react';
-import { getJson, postJson } from '../../lib/api';
+import { getJson, postJson, sendForm, checkImage, evidenceImageUrl } from '../../lib/api';
 
 const inputClass = 'w-full rounded border px-3 py-2';
+
+// ช่องเลือกรูปหลักฐาน (ไม่บังคับ)
+function ImageField({ label }) {
+  return (
+    <div>
+      <label className="text-sm text-gray-600">{label} (ไม่บังคับ, JPG/PNG/WebP ไม่เกิน 5 MB)</label>
+      <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" />
+    </div>
+  );
+}
+
+// รูปหลักฐานในรายละเอียด (กดเพื่อดูภาพเต็มในแท็บใหม่)
+function Evidence({ name, label }) {
+  if (!name) return null;
+  return (
+    <a href={evidenceImageUrl(name)} target="_blank" rel="noreferrer" className="block">
+      <span>{label}:</span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={evidenceImageUrl(name)} alt={label} className="mt-1 max-h-40 rounded border" />
+    </a>
+  );
+}
 
 export default function ReturnsPage() {
   const allowed = useRequireRole(['officer', 'admin']);
@@ -37,7 +59,9 @@ export default function ReturnsPage() {
     setError('');
     setMessage('');
     const form = new FormData(e.target);
-    const { ok, data } = await postJson('/api/returns', Object.fromEntries(form));
+    const imageError = checkImage(form.get('image'));
+    if (imageError) return setError(imageError);
+    const { ok, data } = await sendForm('POST', '/api/returns', form);
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     e.target.reset();
     setMessage('บันทึกการส่งมอบแล้ว');
@@ -49,7 +73,9 @@ export default function ReturnsPage() {
     setError('');
     setMessage('');
     const form = new FormData(e.target);
-    const { ok, data } = await postJson(`/api/returns/${returnId}/dispute`, Object.fromEntries(form));
+    const imageError = checkImage(form.get('image'));
+    if (imageError) return setError(imageError);
+    const { ok, data } = await sendForm('POST', `/api/returns/${returnId}/dispute`, form);
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     setDisputeId(null);
     setMessage('บันทึกข้อโต้แย้งแล้ว');
@@ -92,6 +118,7 @@ export default function ReturnsPage() {
           <input name="receiver_contact" placeholder="เบอร์ติดต่อผู้รับ" className={inputClass} />
           <input name="sender_name" placeholder="ชื่อผู้ส่งมอบ (เจ้าหน้าที่)" className={inputClass} />
           <input name="witness_name" placeholder="ชื่อพยาน" className={inputClass} />
+          <ImageField label="รูปหลักฐานการส่งมอบ" />
           <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">ยืนยันส่งมอบ</button>
         </form>
       )}
@@ -139,11 +166,13 @@ export default function ReturnsPage() {
                         <p>พยาน: {r.witness_name || '-'}</p>
                         <p>เจ้าหน้าที่ที่บันทึก: {r.officer_name}</p>
                         <p>วันเวลาที่ส่งมอบ: {new Date(r.returned_at).toLocaleString('th-TH')}</p>
+                        <Evidence name={r.proof_image} label="รูปหลักฐานการส่งมอบ" />
                         {r.claimant_name && (
                           <p className="text-red-600">
                             ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail} ({new Date(r.disputed_at).toLocaleString('th-TH')})
                           </p>
                         )}
+                        <Evidence name={r.dispute_image} label="รูปหลักฐานของผู้โต้แย้ง" />
                         {r.resolved_at && (
                           <p className="text-green-700">
                             ผลการเจรจา: {r.resolution} ({new Date(r.resolved_at).toLocaleString('th-TH')})
@@ -171,6 +200,7 @@ export default function ReturnsPage() {
                         <form onSubmit={(e) => handleDispute(e, r.id)} className="space-y-2">
                           <input name="claimant_name" required placeholder="ชื่อผู้โต้แย้ง" className={inputClass} />
                           <textarea name="new_detail" required placeholder="รายละเอียดที่อ้างเป็นเจ้าของ" className={inputClass} />
+                          <ImageField label="รูปหลักฐานของผู้โต้แย้ง" />
                           <button type="submit" className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700">บันทึกข้อโต้แย้ง</button>
                         </form>
                       </td>

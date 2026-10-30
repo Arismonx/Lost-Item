@@ -13,7 +13,7 @@ lostitem-return-back/
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
 │       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, returns.js, users.js, broadcasts.js, contact.js)
 │       └── middleware/  ตรวจ login / role (auth.js, upload.js)
-│   └── uploads/         รูปที่อัปโหลด (ไม่เข้า git, เสิร์ฟที่ /uploads/items)
+│   └── uploads/         รูปที่อัปโหลด (ไม่เข้า git): items เสิร์ฟสาธารณะที่ /uploads/items, evidence ดูผ่าน /api/returns/images/:name เฉพาะ officer/admin
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
 ```
@@ -72,29 +72,30 @@ npm run dev
 
 ## API ที่มีตอนนี้
 
-| Method | Path                 | ทำอะไร                               | UC    |
-| ------ | -------------------- | ------------------------------------ | ----- |
-| GET    | `/api/health`        | เช็กเซิร์ฟเวอร์และฐานข้อมูล          | –     |
-| POST   | `/api/auth/register` | สมัครสมาชิก (เฉพาะอีเมล `@ru.ac.th`) | UC_01 |
-| POST   | `/api/auth/login`    | เข้าสู่ระบบ (ตั้ง cookie `token`)    | UC_02 |
-| POST   | `/api/auth/logout`   | ออกจากระบบ                           | UC_02 |
-| GET    | `/api/auth/me`       | ดูผู้ใช้ที่ล็อกอินอยู่               | –     |
-| GET    | `/api/auth/profile`  | ดูข้อมูลบัญชีตัวเอง (ต้องล็อกอิน)    | UC_03 |
-| PATCH  | `/api/auth/profile`  | แก้ชื่อ/เบอร์ติดต่อของตัวเอง         | UC_03 |
-| PATCH  | `/api/auth/password` | เปลี่ยนรหัสผ่านของตัวเอง             | UC_03 |
-| POST   | `/api/lost-items`    | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) ส่งเป็น multipart/form-data ได้ ช่อง `image` (ไม่บังคับ, JPG/PNG/WebP ≤ 5 MB) | UC_04 |
-| GET    | `/api/lost-items/search?q=` | ค้นหาของหายที่รอเจ้าของมารับ (ต้องล็อกอิน) | UC_06 |
-| GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
-| PATCH  | `/api/lost-items/:id` | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found, เปลี่ยนรูปได้ด้วยช่อง `image`) + แก้ประชาสัมพันธ์ที่ผูกอยู่ | UC_05 |
-| POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
-| GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
-| POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
-| POST   | `/api/returns/:id/resolve` | ปิดข้อโต้แย้ง บันทึกผลเจรจา ตั้งของกลับเป็น returned (officer, admin) | UC_09 |
-| GET    | `/api/broadcasts`    | ดูประชาสัมพันธ์ (ทุกคน)              | UC_08 |
-| POST   | `/api/broadcasts`    | ส่งประชาสัมพันธ์ (officer, admin)    | UC_08 |
-| GET    | `/api/contact/officers` | รายชื่อ/เบอร์ติดต่อเจ้าหน้าที่ (ทุกคน) | UC_07 |
-| GET    | `/api/users`         | ดูผู้ใช้ทั้งหมด (admin)              | UC_03 |
-| PATCH  | `/api/users/:id/role`| กำหนด role เป็น user/officer (admin) | UC_03 |
+| Method | Path                        | ทำอะไร                                                                                                                                       | UC    |
+| ------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| GET    | `/api/health`               | เช็กเซิร์ฟเวอร์และฐานข้อมูล                                                                                                                  | –     |
+| POST   | `/api/auth/register`        | สมัครสมาชิก (เฉพาะอีเมล `@ru.ac.th`)                                                                                                         | UC_01 |
+| POST   | `/api/auth/login`           | เข้าสู่ระบบ (ตั้ง cookie `token`)                                                                                                            | UC_02 |
+| POST   | `/api/auth/logout`          | ออกจากระบบ                                                                                                                                   | UC_02 |
+| GET    | `/api/auth/me`              | ดูผู้ใช้ที่ล็อกอินอยู่                                                                                                                       | –     |
+| GET    | `/api/auth/profile`         | ดูข้อมูลบัญชีตัวเอง (ต้องล็อกอิน)                                                                                                            | UC_03 |
+| PATCH  | `/api/auth/profile`         | แก้ชื่อ/เบอร์ติดต่อของตัวเอง                                                                                                                 | UC_03 |
+| PATCH  | `/api/auth/password`        | เปลี่ยนรหัสผ่านของตัวเอง                                                                                                                     | UC_03 |
+| POST   | `/api/lost-items`           | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) ส่งเป็น multipart/form-data ได้ ช่อง `image` (ไม่บังคับ, JPG/PNG/WebP ≤ 5 MB) | UC_04 |
+| GET    | `/api/lost-items/search?q=` | ค้นหาของหายที่รอเจ้าของมารับ (ต้องล็อกอิน)                                                                                                   | UC_06 |
+| GET    | `/api/lost-items`           | ดูรายการของหายทั้งหมด (officer, admin)                                                                                                       | UC_05 |
+| PATCH  | `/api/lost-items/:id`       | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found, เปลี่ยนรูปได้ด้วยช่อง `image`) + แก้ประชาสัมพันธ์ที่ผูกอยู่                                   | UC_05 |
+| POST   | `/api/returns`              | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) ส่ง multipart ได้ ช่อง `image` = รูปหลักฐาน (ไม่บังคับ)                                | UC_09 |
+| GET    | `/api/returns`              | ประวัติการส่งมอบ (officer, admin)                                                                                                            | UC_09 |
+| GET    | `/api/returns/images/:name` | ดูรูปหลักฐานส่งมอบ/โต้แย้ง (officer, admin เท่านั้น)                                                                                         | UC_09 |
+| POST   | `/api/returns/:id/dispute`  | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) ส่ง multipart ได้ ช่อง `image` = รูปหลักฐาน (ไม่บังคับ)                               | UC_09 |
+| POST   | `/api/returns/:id/resolve`  | ปิดข้อโต้แย้ง บันทึกผลเจรจา ตั้งของกลับเป็น returned (officer, admin)                                                                        | UC_09 |
+| GET    | `/api/broadcasts`           | ดูประชาสัมพันธ์ (ทุกคน)                                                                                                                      | UC_08 |
+| POST   | `/api/broadcasts`           | ส่งประชาสัมพันธ์ (officer, admin)                                                                                                            | UC_08 |
+| GET    | `/api/contact/officers`     | รายชื่อ/เบอร์ติดต่อเจ้าหน้าที่ (ทุกคน)                                                                                                       | UC_07 |
+| GET    | `/api/users`                | ดูผู้ใช้ทั้งหมด (admin)                                                                                                                      | UC_03 |
+| PATCH  | `/api/users/:id/role`       | กำหนด role เป็น user/officer (admin)                                                                                                         | UC_03 |
 
 ตัวอย่างสมัครสมาชิก:
 
@@ -108,16 +109,16 @@ curl -X POST http://localhost:4000/api/auth/register \
 
 error ที่ 4xx ตอบเป็น JSON รูปแบบ `{ "error": "ข้อความ" }` (ยกเว้น 500 ที่ Express ตอบหน้า error ธรรมดา และ `/api/health` ตอบ `{ ok, db }`) ส่วนที่สำเร็จจะมีข้อมูลตามชนิด เช่น `{ "item": ... }`
 
-| Code | ความหมาย                 | เกิดเมื่อ                                                                 |
-| ---- | ------------------------ | ------------------------------------------------------------------------- |
-| 200  | OK                       | ดึงข้อมูล/แก้ไข/ออกจากระบบสำเร็จ                                          |
-| 201  | Created                  | สร้างข้อมูลใหม่สำเร็จ (สมัครสมาชิก, ลงทะเบียนของหาย, ส่งมอบ, โต้แย้ง)     |
-| 400  | Bad Request              | กรอกข้อมูลไม่ครบ/รูปแบบไม่ถูก เช่น ไม่ใช่อีเมล RU Mail, รหัสผ่านสั้นไป, วันที่ผิด |
-| 401  | Unauthorized             | ยังไม่ล็อกอิน, token หมดอายุ, อีเมลหรือรหัสผ่านไม่ถูกต้อง                 |
-| 403  | Forbidden                | ล็อกอินแล้วแต่ role ไม่มีสิทธิ์ เช่น user เรียก API ของ officer           |
-| 404  | Not Found                | ไม่พบข้อมูลที่อ้างถึง เช่น ไม่มีของหาย/รายการส่งมอบ/ผู้ใช้ตามรหัสนั้น     |
-| 409  | Conflict                 | ขัดกับสถานะปัจจุบัน เช่น อีเมลถูกใช้แล้ว, ส่งมอบของที่ไม่ใช่ `found`, โต้แย้งซ้ำ |
-| 500  | Internal Server Error    | เซิร์ฟเวอร์/ฐานข้อมูลผิดพลาด (ดู log ที่ terminal ของ backend)             |
+| Code | ความหมาย              | เกิดเมื่อ                                                                         |
+| ---- | --------------------- | --------------------------------------------------------------------------------- |
+| 200  | OK                    | ดึงข้อมูล/แก้ไข/ออกจากระบบสำเร็จ                                                  |
+| 201  | Created               | สร้างข้อมูลใหม่สำเร็จ (สมัครสมาชิก, ลงทะเบียนของหาย, ส่งมอบ, โต้แย้ง)             |
+| 400  | Bad Request           | กรอกข้อมูลไม่ครบ/รูปแบบไม่ถูก เช่น ไม่ใช่อีเมล RU Mail, รหัสผ่านสั้นไป, วันที่ผิด |
+| 401  | Unauthorized          | ยังไม่ล็อกอิน, token หมดอายุ, อีเมลหรือรหัสผ่านไม่ถูกต้อง                         |
+| 403  | Forbidden             | ล็อกอินแล้วแต่ role ไม่มีสิทธิ์ เช่น user เรียก API ของ officer                   |
+| 404  | Not Found             | ไม่พบข้อมูลที่อ้างถึง เช่น ไม่มีของหาย/รายการส่งมอบ/ผู้ใช้ตามรหัสนั้น             |
+| 409  | Conflict              | ขัดกับสถานะปัจจุบัน เช่น อีเมลถูกใช้แล้ว, ส่งมอบของที่ไม่ใช่ `found`, โต้แย้งซ้ำ  |
+| 500  | Internal Server Error | เซิร์ฟเวอร์/ฐานข้อมูลผิดพลาด (ดู log ที่ terminal ของ backend)                    |
 
 วิธีจำ: **4xx = ผู้เรียกทำผิด (แก้ที่ข้อมูลหรือสิทธิ์)**, **5xx = ฝั่งเซิร์ฟเวอร์ผิด**
 

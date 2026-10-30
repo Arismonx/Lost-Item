@@ -1,6 +1,7 @@
 import multer from 'multer'
 import crypto from 'node:crypto'
 import path from 'node:path'
+import { unlink } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 // โฟลเดอร์เก็บรูป: items = รูปของหาย (สาธารณะ)
@@ -32,4 +33,9 @@ export function uploadImage(folder) {
       next(err)
     })
   }
+}
+
+// ลบไฟล์ที่เพิ่งอัปโหลดทิ้ง ใช้เมื่อ request ไม่ผ่านการตรวจหลังรับไฟล์แล้ว (กันไฟล์ค้างโดยไม่มีรายการอ้างถึง)
+export function dropUpload(req) {
+  if (req.file) unlink(req.file.path).catch(() => {})
 }

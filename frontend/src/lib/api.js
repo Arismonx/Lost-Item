@@ -52,3 +52,8 @@ export function checkImage(file) {
   if (file.size > 5 * 1024 * 1024) return 'รูปต้องมีขนาดไม่เกิน 5 MB';
   return '';
 }
+
+// ที่อยู่รูปหลักฐานส่งมอบ/โต้แย้ง (ดูได้เฉพาะ officer/admin ที่ล็อกอิน) ไม่มีรูป = null
+export function evidenceImageUrl(name) {
+  return name ? `${API_URL}/api/returns/images/${name}` : null;
+}
