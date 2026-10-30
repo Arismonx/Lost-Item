@@ -1,14 +1,16 @@
 import { Router } from 'express'
 import { pool } from '../db.js'
 import { requireLogin, requireRole } from '../middleware/auth.js'
+import { uploadImage } from '../middleware/upload.js'
 
 const router = Router()
 
 // เฉพาะเจ้าหน้าที่และแอดมินเท่านั้นที่จัดการของหายได้
 const staffOnly = requireRole('officer', 'admin')
+const itemImage = uploadImage('items') // รูปของหาย (ไม่บังคับ) ส่งมาเป็น multipart ช่อง image
 
 // UC_04 ลงทะเบียนของหาย
-router.post('/', staffOnly, async (req, res) => {
+router.post('/', staffOnly, itemImage, async (req, res) => {
   const { name, detail, location, found_date } = req.body
   if (!name?.trim() || !location?.trim() || !found_date) {
     return res.status(400).json({ error: 'กรุณากรอกชื่อของ สถานที่พบ และวันที่พบ' })
@@ -19,15 +21,15 @@ router.post('/', staffOnly, async (req, res) => {
   try {
     await client.query('BEGIN')
     const { rows } = await client.query(
-      `INSERT INTO lost_items (name, detail, location, found_date, created_by)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [name.trim(), (detail || '').trim(), location.trim(), found_date, req.user.id]
+      `INSERT INTO lost_items (name, detail, location, found_date, image, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [name.trim(), (detail || '').trim(), location.trim(), found_date, req.file?.filename || null, req.user.id]
     )
     const item = rows[0]
     await client.query(
-      `INSERT INTO broadcasts (title, description, item_id, created_by)
-       VALUES ($1, $2, $3, $4)`,
-      [`พบ ${item.name}`, `ที่${item.location}`, item.id, req.user.id]
+      `INSERT INTO broadcasts (title, description, image, item_id, created_by)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [`พบ ${item.name}`, `ที่${item.location}`, item.image, item.id, req.user.id]
     )
     await client.query('COMMIT')
     res.status(201).json({ item })
@@ -62,7 +64,7 @@ router.get('/', staffOnly, async (req, res) => {
 })
 
 // UC_05 แก้ไขของหาย (แก้ได้เฉพาะที่ยังรอรับคืน) แก้ข้อความประชาสัมพันธ์ที่ผูกอยู่ให้ตรงกันด้วย
-router.patch('/:id', staffOnly, async (req, res) => {
+router.patch('/:id', staffOnly, itemImage, async (req, res) => {
   const { name, detail, location, found_date } = req.body
   if (!name?.trim() || !location?.trim() || !found_date) {
     return res.status(400).json({ error: 'กรุณากรอกชื่อของ สถานที่พบ และวันที่พบ' })
@@ -81,14 +83,15 @@ router.patch('/:id', staffOnly, async (req, res) => {
       return res.status(409).json({ error: 'แก้ไขได้เฉพาะของที่ยังรอรับคืน' })
     }
     const { rows } = await client.query(
-      `UPDATE lost_items SET name = $1, detail = $2, location = $3, found_date = $4
-       WHERE id = $5 RETURNING *`,
-      [name.trim(), (detail || '').trim(), location.trim(), found_date, req.params.id]
+      `UPDATE lost_items SET name = $1, detail = $2, location = $3, found_date = $4,
+         image = COALESCE($5, image)
+       WHERE id = $6 RETURNING *`,
+      [name.trim(), (detail || '').trim(), location.trim(), found_date, req.file?.filename || null, req.params.id]
     )
     const item = rows[0]
     await client.query(
-      'UPDATE broadcasts SET title = $1, description = $2 WHERE item_id = $3',
-      [`พบ ${item.name}`, `ที่${item.location}`, item.id]
+      'UPDATE broadcasts SET title = $1, description = $2, image = $3 WHERE item_id = $4',
+      [`พบ ${item.name}`, `ที่${item.location}`, item.image, item.id]
     )
     await client.query('COMMIT')
     res.json({ item })

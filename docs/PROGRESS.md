@@ -20,7 +20,8 @@
 - [x] ลงทะเบียนของหาย (`POST /api/lost-items`) สร้างประชาสัมพันธ์อัตโนมัติทุกครั้ง (transaction เดียวกัน, ผูก `item_id`) + หน้า `/broadcast` ใช้ปุ่ม "เพิ่มประชาสัมพันธ์" แล้วค่อยแสดงฟอร์ม ทดสอบ curl แล้ว
 - [x] UC_06 ค้นหาของหาย: GET `/api/lost-items/search?q=` (ต้องล็อกอิน, เห็นเฉพาะสถานะ found, ค้นชื่อ/สถานที่/รายละเอียด) + หน้า `/search` ทดสอบ curl แล้ว lint ผ่าน ยังไม่ลองในเบราว์เซอร์ ยังไม่แสดงรูป
 - [x] UC_07 ติดต่อเจ้าหน้าที่: GET `/api/contact/officers` (สาธารณะ, ชื่อ/อีเมล/เบอร์ของ role officer) + หน้า `/contact` (ข้อความสถานที่/เวลารับของเป็นค่าคงที่ในไฟล์ ต้องแก้ให้ตรงของจริง) + หน้า `/search` มีลิงก์ไป `/contact` ทดสอบ curl แล้ว lint ผ่าน ยังไม่ลองในเบราว์เซอร์
-- [ ] อัปโหลดรูป (รวมรูปหลักฐานส่งมอบ/โต้แย้ง)
+- [x] อัปโหลดรูปของหาย (รอบ 1): `middleware/upload.js` (multer, JPG/PNG/WebP ≤5MB, ชื่อไฟล์สุ่ม, เก็บ `backend/uploads/items`, เสิร์ฟ `/uploads/items`) POST/PATCH `/api/lost-items` รับ multipart ช่อง `image`, ประชาสัมพันธ์ใช้รูปเดียวกัน; หน้า new/popup แก้ไข/search/broadcast/lost-items ต่อแล้ว ทดสอบ curl แล้ว lint ผ่าน ยังไม่ลองในเบราว์เซอร์
+- [ ] อัปโหลดรูปหลักฐานส่งมอบ/โต้แย้ง (รอบ 2: เสิร์ฟผ่านเส้นทางที่ตรวจสิทธิ์ officer/admin ก่อน ไม่ใช้โฟลเดอร์สาธารณะ)
 - [x] ตรวจสิทธิ์ role ฝั่งหน้าเว็บ: hook `frontend/src/lib/useRequireRole.js` ใช้ใน dashboard, lost-items(+new), returns, admin/users, search, account (ไม่ล็อกอิน→/login, role ไม่ตรง→/) lint ผ่าน ยังไม่ลองในเบราว์เซอร์
 - [ ] (งานเสริมหลังระบบหลักเสร็จ) ลืมรหัสผ่านในหน้า login: ส่งลิงก์รีเซ็ตไป RU Mail (ต้องตั้ง SMTP + token หมดอายุ)
 - [x] หน้า register แยกช่องชื่อ/นามสกุล แล้วรวมเป็น `name` ก่อนส่ง API (DB เหมือนเดิม) lint ผ่าน

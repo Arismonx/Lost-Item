@@ -12,7 +12,8 @@ lostitem-return-back/
 │       ├── index.js     จุดเริ่มต้นของเซิร์ฟเวอร์
 │       ├── db.js        เชื่อม PostgreSQL + สร้างตาราง
 │       ├── routes/      API แยกตามหมวด (auth.js, lost-items.js, returns.js, users.js, broadcasts.js, contact.js)
-│       └── middleware/  ตรวจ login / role
+│       └── middleware/  ตรวจ login / role (auth.js, upload.js)
+│   └── uploads/         รูปที่อัปโหลด (ไม่เข้า git, เสิร์ฟที่ /uploads/items)
 ├── docker-compose.yml   PostgreSQL 16                             → พอร์ต 5432
 └── docs/                เอกสาร Use Case
 ```
@@ -81,10 +82,10 @@ npm run dev
 | GET    | `/api/auth/profile`  | ดูข้อมูลบัญชีตัวเอง (ต้องล็อกอิน)    | UC_03 |
 | PATCH  | `/api/auth/profile`  | แก้ชื่อ/เบอร์ติดต่อของตัวเอง         | UC_03 |
 | PATCH  | `/api/auth/password` | เปลี่ยนรหัสผ่านของตัวเอง             | UC_03 |
-| POST   | `/api/lost-items`    | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) | UC_04 |
+| POST   | `/api/lost-items`    | ลงทะเบียนของหาย + สร้างประชาสัมพันธ์อัตโนมัติ (officer, admin) ส่งเป็น multipart/form-data ได้ ช่อง `image` (ไม่บังคับ, JPG/PNG/WebP ≤ 5 MB) | UC_04 |
 | GET    | `/api/lost-items/search?q=` | ค้นหาของหายที่รอเจ้าของมารับ (ต้องล็อกอิน) | UC_06 |
 | GET    | `/api/lost-items`    | ดูรายการของหายทั้งหมด (officer, admin) | UC_05 |
-| PATCH  | `/api/lost-items/:id` | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found) + แก้ประชาสัมพันธ์ที่ผูกอยู่ | UC_05 |
+| PATCH  | `/api/lost-items/:id` | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found, เปลี่ยนรูปได้ด้วยช่อง `image`) + แก้ประชาสัมพันธ์ที่ผูกอยู่ | UC_05 |
 | POST   | `/api/returns`       | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) | UC_09 |
 | GET    | `/api/returns`       | ประวัติการส่งมอบ (officer, admin)    | UC_09 |
 | POST   | `/api/returns/:id/dispute` | บันทึกข้อโต้แย้ง ตั้งของเป็น disputed (officer, admin) | UC_09 |
@@ -161,7 +162,7 @@ docker exec lostitem-db psql -U lostitem -c \
 - [x] Backend: สมัคร / เข้าสู่ระบบ / ออกจากระบบ (JWT ใน cookie)
 - [x] Frontend: หน้า login / register / logout ต่อกับ API แล้ว และ Navbar แสดงเมนูตาม role ของผู้ใช้จริง
 - [x] Backend: ตาราง `lost_items` + API ลงทะเบียน/ดูของหาย จำกัดสิทธิ์ officer/admin (ทดสอบด้วย curl แล้ว)
-- [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (ยังไม่มีรูปภาพ)
+- [x] Frontend: หน้า `/lost-items/new` (บันทึก) และ `/lost-items` (แสดงรายการจริง) ต่อกับ API แล้ว (รองรับรูปภาพ)
 - [x] Frontend: หน้า `/dashboard` สำหรับ officer/admin (สรุปจำนวนของตามสถานะ + ปุ่มลัด), login แล้วพาไปตาม role
 - [x] UC_03: แอดมินกำหนด role ผ่านหน้า `/admin/users` + API
 - [x] UC_03: หน้า `/account` แสดงข้อมูลบัญชี มีปุ่มแก้ชื่อ/เบอร์ติดต่อ และเปลี่ยนรหัสผ่านของตัวเอง + API

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getJson, postJson } from '../../lib/api';
+import { getJson, postJson, itemImageUrl } from '../../lib/api';
 
 export default function BroadcastPage() {
   const [user, setUser] = useState(null);
@@ -60,6 +60,10 @@ export default function BroadcastPage() {
       <ul className="mt-4 space-y-2">
         {posts.map((p) => (
           <li key={p.id} className="rounded border p-3">
+            {p.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={itemImageUrl(p.image)} alt={p.title} className="mb-2 max-h-48 rounded object-cover" />
+            )}
             <div className="font-medium">{p.title}</div>
             {p.description && <p className="mt-1 text-sm">{p.description}</p>}
             <div className="text-sm text-gray-500">

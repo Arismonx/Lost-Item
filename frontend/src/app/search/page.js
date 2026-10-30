@@ -2,7 +2,7 @@
 import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getJson } from '../../lib/api';
+import { getJson, itemImageUrl } from '../../lib/api';
 
 export default function SearchPage() {
   const allowed = useRequireRole(['user', 'officer', 'admin']);
@@ -48,6 +48,10 @@ export default function SearchPage() {
       <ul className="mt-4 space-y-2">
         {items?.map((i) => (
           <li key={i.id} className="rounded border p-3">
+            {i.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={itemImageUrl(i.image)} alt={i.name} className="mb-2 max-h-48 rounded object-cover" />
+            )}
             <div className="font-medium">{i.name}</div>
             {i.detail && <p className="mt-1 text-sm">{i.detail}</p>}
             <div className="text-sm text-gray-500">พบที่ {i.location} · {i.found_date}</div>

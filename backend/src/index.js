@@ -3,6 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { pool, initDb } from './db.js'
 import { loadUser } from './middleware/auth.js'
+import { UPLOAD_ROOT } from './middleware/upload.js'
 import authRoutes from './routes/auth.js'
 import broadcastRoutes from './routes/broadcasts.js'
 import contactRoutes from './routes/contact.js'
@@ -26,6 +27,11 @@ app.get('/api/health', async (req, res) => {
     res.status(500).json({ ok: false, db: err.message })
   }
 })
+
+// รูปของหายเปิดสาธารณะ (ประชาสัมพันธ์ดูได้ทุกคน) รูปหลักฐานจะดูไม่ได้
+app.use('/uploads/items', express.static(`${UPLOAD_ROOT}/items`, {
+  setHeaders: (res) => res.set('X-Content-Type-Options', 'nosniff'),
+}))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/broadcasts', broadcastRoutes)

@@ -2,7 +2,7 @@
 import useRequireRole from '../../../lib/useRequireRole';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { postJson } from '../../../lib/api';
+import { sendForm, checkImage } from '../../../lib/api';
 
 export default function NewLostItemPage() {
   const allowed = useRequireRole(['officer', 'admin']);
@@ -13,12 +13,9 @@ export default function NewLostItemPage() {
     e.preventDefault();
     setError('');
     const form = new FormData(e.target);
-    const { ok, data } = await postJson('/api/lost-items', {
-      name: form.get('name'),
-      found_date: form.get('found_date'),
-      location: form.get('location'),
-      detail: form.get('detail'),
-    });
+    const imageError = checkImage(form.get('image'));
+    if (imageError) return setError(imageError);
+    const { ok, data } = await sendForm('POST', '/api/lost-items', form);
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     router.push('/lost-items');
   }
@@ -33,6 +30,10 @@ export default function NewLostItemPage() {
         <input name="found_date" type="date" required className="w-full rounded border px-3 py-2" />
         <input name="location" required placeholder="สถานที่พบ" className="w-full rounded border px-3 py-2" />
         <textarea name="detail" placeholder="รายละเอียดเพิ่มเติม" className="w-full rounded border px-3 py-2" />
+        <div>
+          <label className="text-sm text-gray-600">รูปภาพ (ไม่บังคับ, JPG/PNG/WebP ไม่เกิน 5 MB)</label>
+          <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" />
+        </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">บันทึก</button>
       </form>

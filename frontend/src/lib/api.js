@@ -31,3 +31,24 @@ export async function patchJson(path, body) {
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, data };
 }
+
+// ส่งฟอร์มที่มีไฟล์ (FormData) ฝั่งเบราว์เซอร์ method = 'POST' หรือ 'PATCH' คืนค่า { ok, data }
+// ห้ามตั้ง Content-Type เอง เบราว์เซอร์จะใส่ boundary ให้
+export async function sendForm(method, path, formData) {
+  const res = await fetch(`${API_URL}${path}`, { method, credentials: 'include', body: formData });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
+// ที่อยู่รูปของหาย (เก็บใน DB เป็นชื่อไฟล์) ไม่มีรูป = null
+export function itemImageUrl(name) {
+  return name ? `${API_URL}/uploads/items/${name}` : null;
+}
+
+// ตรวจไฟล์รูปก่อนส่ง (backend ตรวจซ้ำอีกชั้น) คืนข้อความ error หรือ '' ถ้าผ่าน/ไม่ได้เลือก
+export function checkImage(file) {
+  if (!file || !file.size) return '';
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return 'รองรับเฉพาะไฟล์ JPG, PNG, WebP';
+  if (file.size > 5 * 1024 * 1024) return 'รูปต้องมีขนาดไม่เกิน 5 MB';
+  return '';
+}

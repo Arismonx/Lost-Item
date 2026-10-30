@@ -2,7 +2,7 @@
 import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getJson, patchJson } from '../../lib/api';
+import { getJson, sendForm, checkImage, itemImageUrl } from '../../lib/api';
 
 // ชื่อสถานะที่แสดงบนหน้าเว็บ
 const STATUS_TEXT = {
@@ -31,12 +31,17 @@ export default function LostItemsPage() {
   function startEdit(i) {
     setError('');
     setEditId(i.id);
-    setForm({ name: i.name, location: i.location, found_date: i.found_date, detail: i.detail || '' });
+    setForm({ name: i.name, location: i.location, found_date: i.found_date, detail: i.detail || '', image: null, currentImage: i.image });
   }
 
   async function saveEdit() {
     setError('');
-    const { ok, data } = await patchJson(`/api/lost-items/${editId}`, form);
+    const imageError = checkImage(form.image);
+    if (imageError) return setError(imageError);
+    const body = new FormData();
+    ['name', 'location', 'found_date', 'detail'].forEach((k) => body.append(k, form[k]));
+    if (form.image) body.append('image', form.image);
+    const { ok, data } = await sendForm('PATCH', `/api/lost-items/${editId}`, body);
     if (!ok) return setError(data.error || 'บันทึกไม่สำเร็จ');
     setItems((list) => list.map((i) => (i.id === editId ? data.item : i)));
     setEditId(null);
@@ -58,6 +63,7 @@ export default function LostItemsPage() {
           <thead>
             <tr className="border-b">
               <th className="py-2">ID</th>
+              <th>รูป</th>
               <th>ชื่อ</th>
               <th>สถานที่</th>
               <th>วันที่พบ</th>
@@ -69,6 +75,12 @@ export default function LostItemsPage() {
             {items.map((i) => (
               <tr key={i.id} className="border-b">
                 <td className="py-2">{i.id}</td>
+                <td>
+                  {i.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={itemImageUrl(i.image)} alt={i.name} className="h-12 w-12 rounded object-cover" />
+                  )}
+                </td>
                 <td>{i.name}</td>
                 <td>{i.location}</td>
                 <td>{i.found_date}</td>
@@ -96,6 +108,14 @@ export default function LostItemsPage() {
             <input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="สถานที่พบ" className="w-full rounded border px-3 py-2" />
             <input required type="date" value={form.found_date} onChange={(e) => setForm({ ...form, found_date: e.target.value })} className="w-full rounded border px-3 py-2" />
             <textarea value={form.detail} onChange={(e) => setForm({ ...form, detail: e.target.value })} placeholder="รายละเอียด" rows={3} className="w-full rounded border px-3 py-2" />
+            {form.currentImage && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={itemImageUrl(form.currentImage)} alt="รูปปัจจุบัน" className="h-24 rounded object-cover" />
+            )}
+            <div>
+              <label className="text-sm text-gray-600">{form.currentImage ? 'เปลี่ยนรูป (ไม่เลือก = ใช้รูปเดิม)' : 'รูปภาพ (ไม่บังคับ)'} JPG/PNG/WebP ไม่เกิน 5 MB</label>
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setForm({ ...form, image: e.target.files[0] || null })} className="mt-1 block w-full text-sm" />
+            </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setEditId(null)} className="rounded border px-4 py-2">ยกเลิก</button>
