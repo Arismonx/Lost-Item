@@ -27,24 +27,33 @@ export default function AdminUsersPage() {
   if (!allowed) return null;
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">จัดการผู้ใช้ / กำหนด Role</h1>
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-      {!error && users === null && <p className="mt-4 text-gray-500">กำลังโหลด...</p>}
+    <main className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="text-xl font-bold text-brand">จัดการผู้ใช้ / กำหนด Role</h1>
+        <p className="text-xs text-slate-500">ตั้งผู้ใช้เป็น user หรือ officer (บัญชี admin เปลี่ยนไม่ได้)</p>
+      </div>
+      {error && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
+      {!error && users === null && <p className="text-sm text-slate-500">กำลังโหลด...</p>}
       {users && (
-        <ul className="mt-4 space-y-2">
+        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {users.map((u) => (
-            <li key={u.id} className="flex items-center justify-between rounded border p-3">
-              <span>
-                {u.name} <span className="text-sm text-gray-500">({u.email})</span>
-              </span>
+            <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent">
+                  {u.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand">{u.name}</p>
+                  <p className="font-mono text-xs text-slate-500">{u.email}</p>
+                </div>
+              </div>
               {u.role === 'admin' ? (
-                <span className="px-2 py-1 text-sm text-gray-500">admin</span>
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">🛡️ admin</span>
               ) : (
                 <select
                   value={u.role}
                   onChange={(e) => changeRole(u.id, e.target.value)}
-                  className="rounded border px-2 py-1"
+                  className="cursor-pointer rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent"
                 >
                   <option value="user">user</option>
                   <option value="officer">officer</option>
