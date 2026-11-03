@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getJson, postJson, itemImageUrl } from '../../lib/api';
+import { getJson, postJson, deleteJson, itemImageUrl } from '../../lib/api';
 
 export default function BroadcastPage() {
   const [user, setUser] = useState(null);
@@ -32,46 +32,65 @@ export default function BroadcastPage() {
     load();
   }
 
+  async function handleDelete(id) {
+    if (!confirm('ลบประชาสัมพันธ์นี้?')) return;
+    const { ok, data } = await deleteJson(`/api/broadcasts/${id}`);
+    if (!ok) return setError(data.error || 'ลบไม่สำเร็จ');
+    setPosts((list) => list.filter((p) => p.id !== id));
+  }
+
   const isStaff = user && (user.role === 'officer' || user.role === 'admin');
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">ประชาสัมพันธ์</h1>
-
-      {isStaff && !showForm && (
-        <button onClick={() => setShowForm(true)} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-          + เพิ่มประชาสัมพันธ์
-        </button>
-      )}
+    <main className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div>
+          <h1 className="text-xl font-bold text-brand">ประชาสัมพันธ์</h1>
+          <p className="text-xs text-slate-500">ประกาศข่าวสารสิ่งของสูญหายประจำภาควิชาวิทยาการคอมพิวเตอร์</p>
+        </div>
+        {isStaff && !showForm && (
+          <button onClick={() => setShowForm(true)} className="cursor-pointer rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#001c30]">
+            + เพิ่มประชาสัมพันธ์
+          </button>
+        )}
+      </div>
 
       {isStaff && showForm && (
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded border p-3">
-          <input name="title" required placeholder="หัวข้อ" className="w-full rounded border px-3 py-2" />
-          <textarea name="description" placeholder="รายละเอียด" className="w-full rounded border px-3 py-2" />
-          <input name="item_id" type="number" placeholder="รหัสของหาย (ไม่บังคับ)" className="w-full rounded border px-3 py-2" />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <input name="title" required placeholder="หัวข้อ" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+          <textarea name="description" placeholder="รายละเอียด" rows={3} className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+          <input name="item_id" type="number" placeholder="รหัสของหาย (ไม่บังคับ)" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+          {error && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
           <div className="flex gap-2">
-            <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">ส่งประชาสัมพันธ์</button>
-            <button type="button" onClick={() => setShowForm(false)} className="rounded border px-4 py-2 hover:bg-gray-50">ยกเลิก</button>
+            <button type="submit" className="cursor-pointer rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#001c30]">ส่งประชาสัมพันธ์</button>
+            <button type="button" onClick={() => setShowForm(false)} className="cursor-pointer rounded-xl border border-slate-300 px-5 py-2.5 text-sm hover:bg-slate-50">ยกเลิก</button>
           </div>
         </form>
       )}
 
-      <ul className="mt-4 space-y-2">
+      {error && !showForm && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
+
+      <ul className="space-y-4">
         {posts.map((p) => (
-          <li key={p.id} className="rounded border p-3">
+          <li key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">ประกาศ</span>
+              <span className="text-xs text-slate-400">{new Date(p.created_at).toLocaleDateString('th-TH')}</span>
+            </div>
             {p.image && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={itemImageUrl(p.image)} alt={p.title} className="mb-2 max-h-48 rounded object-cover" />
+              <img src={itemImageUrl(p.image)} alt={p.title} className="mb-3 max-h-64 rounded-xl object-cover" />
             )}
-            <div className="font-medium">{p.title}</div>
-            {p.description && <p className="mt-1 text-sm">{p.description}</p>}
-            <div className="text-sm text-gray-500">
-              {new Date(p.created_at).toLocaleDateString('th-TH')}
-            </div>
+            <h2 className="text-base font-bold text-brand">{p.title}</h2>
+            {p.description && <p className="mt-1 text-xs leading-relaxed text-slate-600">{p.description}</p>}
+            {isStaff && (
+              <button onClick={() => handleDelete(p.id)} className="mt-3 cursor-pointer rounded-lg border border-rose-300 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50">
+                ลบ
+              </button>
+            )}
           </li>
         ))}
-        {posts.length === 0 && <li className="text-gray-500">ยังไม่มีประชาสัมพันธ์</li>}
+        {posts.length === 0 && <li className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">ยังไม่มีประชาสัมพันธ์</li>}
       </ul>
     </main>
   );

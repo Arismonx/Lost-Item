@@ -33,4 +33,11 @@ router.post('/', requireRole('officer', 'admin'), async (req, res) => {
   }
 })
 
+// UC_08 ลบประชาสัมพันธ์ (เฉพาะเจ้าหน้าที่/แอดมิน) ลบแค่ประกาศ ไม่แตะของหายที่ผูกอยู่
+router.delete('/:id', requireRole('officer', 'admin'), async (req, res) => {
+  const { rowCount } = await pool.query('DELETE FROM broadcasts WHERE id = $1', [req.params.id])
+  if (rowCount === 0) return res.status(404).json({ error: 'ไม่พบประชาสัมพันธ์นี้' })
+  res.json({ ok: true })
+})
+
 export default router

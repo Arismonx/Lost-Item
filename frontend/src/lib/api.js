@@ -32,6 +32,13 @@ export async function patchJson(path, body) {
   return { ok: res.ok, data };
 }
 
+// ลบข้อมูลผ่าน API (DELETE) ฝั่งเบราว์เซอร์ คืนค่า { ok, data }
+export async function deleteJson(path) {
+  const res = await fetch(`${API_URL}${path}`, { method: 'DELETE', credentials: 'include' });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
 // ส่งฟอร์มที่มีไฟล์ (FormData) ฝั่งเบราว์เซอร์ method = 'POST' หรือ 'PATCH' คืนค่า { ok, data }
 // ห้ามตั้ง Content-Type เอง เบราว์เซอร์จะใส่ boundary ให้
 export async function sendForm(method, path, formData) {

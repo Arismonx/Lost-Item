@@ -86,6 +86,7 @@ npm run dev
 | GET    | `/api/lost-items/search?q=` | ค้นหาของหายที่รอเจ้าของมารับ (ต้องล็อกอิน)                                                                                                   | UC_06 |
 | GET    | `/api/lost-items`           | ดูรายการของหายทั้งหมด (officer, admin)                                                                                                       | UC_05 |
 | PATCH  | `/api/lost-items/:id`       | แก้ไขของหาย (officer, admin, เฉพาะสถานะ found, เปลี่ยนรูปได้ด้วยช่อง `image`) + แก้ประชาสัมพันธ์ที่ผูกอยู่                                   | UC_05 |
+| DELETE | `/api/lost-items/:id`       | ลบของหาย (officer, admin, เฉพาะสถานะ found) ลบประชาสัมพันธ์ที่ผูกอยู่และไฟล์รูปด้วย | UC_05 |
 | POST   | `/api/returns`              | ยืนยันการส่งมอบ ตั้งของเป็น returned (officer, admin) ส่ง multipart ได้ ช่อง `image` = รูปหลักฐาน (ไม่บังคับ)                                | UC_09 |
 | GET    | `/api/returns`              | ประวัติการส่งมอบ (officer, admin)                                                                                                            | UC_09 |
 | GET    | `/api/returns/images/:name` | ดูรูปหลักฐานส่งมอบ/โต้แย้ง (officer, admin เท่านั้น)                                                                                         | UC_09 |
@@ -93,6 +94,7 @@ npm run dev
 | POST   | `/api/returns/:id/resolve`  | ปิดข้อโต้แย้ง บันทึกผลเจรจา ตั้งของกลับเป็น returned (officer, admin)                                                                        | UC_09 |
 | GET    | `/api/broadcasts`           | ดูประชาสัมพันธ์ (ทุกคน)                                                                                                                      | UC_08 |
 | POST   | `/api/broadcasts`           | ส่งประชาสัมพันธ์ (officer, admin)                                                                                                            | UC_08 |
+| DELETE | `/api/broadcasts/:id`       | ลบประชาสัมพันธ์ (officer, admin) ไม่แตะของหายที่ผูกอยู่ | UC_08 |
 | GET    | `/api/contact/officers`     | รายชื่อ/เบอร์ติดต่อเจ้าหน้าที่ (ทุกคน)                                                                                                       | UC_07 |
 | GET    | `/api/users`                | ดูผู้ใช้ทั้งหมด (admin)                                                                                                                      | UC_03 |
 | PATCH  | `/api/users/:id/role`       | กำหนด role เป็น user/officer (admin)                                                                                                         | UC_03 |

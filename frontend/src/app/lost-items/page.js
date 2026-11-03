@@ -2,7 +2,7 @@
 import useRequireRole from '../../lib/useRequireRole';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getJson, sendForm, checkImage, itemImageUrl } from '../../lib/api';
+import { deleteJson, getJson, sendForm, checkImage, itemImageUrl } from '../../lib/api';
 
 // ชื่อสถานะที่แสดงบนหน้าเว็บ
 const STATUS_TEXT = {
@@ -47,6 +47,14 @@ export default function LostItemsPage() {
     setEditId(null);
   }
 
+  async function handleDelete(i) {
+    if (!confirm(`ลบ "${i.name}" ? (ประชาสัมพันธ์ที่ผูกอยู่จะถูกลบด้วย)`)) return;
+    setError('');
+    const { ok, data } = await deleteJson(`/api/lost-items/${i.id}`);
+    if (!ok) return setError(data.error || 'ลบไม่สำเร็จ');
+    setItems((list) => list.filter((x) => x.id !== i.id));
+  }
+
   if (!allowed) return null;
 
   return (
@@ -87,7 +95,10 @@ export default function LostItemsPage() {
                 <td>{STATUS_TEXT[i.status] || i.status}</td>
                 <td>
                   {i.status === 'found' && (
-                    <button onClick={() => startEdit(i)} className="rounded border px-3 py-1 hover:bg-gray-100">แก้ไข</button>
+                    <div className="flex gap-1">
+                      <button onClick={() => startEdit(i)} className="rounded border px-3 py-1 hover:bg-gray-100">แก้ไข</button>
+                      <button onClick={() => handleDelete(i)} className="rounded border border-red-300 px-3 py-1 text-red-600 hover:bg-red-50">ลบ</button>
+                    </div>
                   )}
                 </td>
               </tr>

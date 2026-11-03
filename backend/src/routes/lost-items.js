@@ -1,7 +1,9 @@
 import { Router } from 'express'
 import { pool } from '../db.js'
 import { requireLogin, requireRole } from '../middleware/auth.js'
-import { uploadImage } from '../middleware/upload.js'
+import path from 'node:path'
+import { unlink } from 'node:fs/promises'
+import { uploadImage, UPLOAD_ROOT } from '../middleware/upload.js'
 
 const router = Router()
 
@@ -100,6 +102,35 @@ router.patch('/:id', staffOnly, itemImage, async (req, res) => {
     if (err.code === '22007' || err.code === '22008') {
       return res.status(400).json({ error: 'รูปแบบวันที่ไม่ถูกต้อง' })
     }
+    throw err
+  } finally {
+    client.release()
+  }
+})
+
+// UC_05 ลบของหาย (ลบได้เฉพาะที่ยังรอรับคืน เพราะที่ส่งคืนแล้วต้องเก็บประวัติการส่งมอบ) ลบประชาสัมพันธ์ที่ผูกอยู่ด้วย
+router.delete('/:id', staffOnly, async (req, res) => {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const found = await client.query('SELECT status, image FROM lost_items WHERE id = $1 FOR UPDATE', [req.params.id])
+    if (found.rowCount === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'ไม่พบของหายนี้' })
+    }
+    if (found.rows[0].status !== 'found') {
+      await client.query('ROLLBACK')
+      return res.status(409).json({ error: 'ลบได้เฉพาะของที่ยังรอรับคืน' })
+    }
+    await client.query('DELETE FROM broadcasts WHERE item_id = $1', [req.params.id])
+    await client.query('DELETE FROM lost_items WHERE id = $1', [req.params.id])
+    await client.query('COMMIT')
+    if (found.rows[0].image) {
+      unlink(path.join(UPLOAD_ROOT, 'items', found.rows[0].image)).catch(() => {}) // ลบไฟล์รูป (ไม่มีไฟล์ก็ข้าม)
+    }
+    res.json({ ok: true })
+  } catch (err) {
+    await client.query('ROLLBACK')
     throw err
   } finally {
     client.release()
