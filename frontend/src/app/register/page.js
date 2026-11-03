@@ -1,11 +1,9 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { postJson } from '../../lib/api';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
 
   async function handleSubmit(e) {
@@ -22,8 +20,7 @@ export default function RegisterPage() {
       contact: form.get('contact'),
     });
     if (!ok) return setError(data.error || 'ลงทะเบียนไม่สำเร็จ');
-    router.push('/'); // สมัครเสร็จล็อกอินให้เลย
-    router.refresh();
+    window.location.assign(String(new URL('/', window.location.origin))); // สมัครเสร็จล็อกอินให้เลย โหลดหน้าใหม่ทั้งหมดให้ Navbar อัปเดต
   }
 
   return (

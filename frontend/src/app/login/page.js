@@ -1,11 +1,9 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { postJson } from '../../lib/api';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
 
   async function handleSubmit(e) {
@@ -18,8 +16,8 @@ export default function LoginPage() {
     });
     if (!ok) return setError(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
     // officer/admin ไปแดชบอร์ด คนอื่นไปหน้าแรก
-    router.push(['officer', 'admin'].includes(data.user.role) ? '/dashboard' : '/');
-    router.refresh(); // ให้ Navbar โหลดข้อมูลผู้ใช้ใหม่
+    // โหลดหน้าใหม่ทั้งหมด เพื่อให้ Navbar และทุกหน้าโหลดข้อมูลผู้ใช้ใหม่
+    window.location.assign(['officer', 'admin'].includes(data.user.role) ? '/dashboard' : '/');
   }
 
   return (

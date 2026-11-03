@@ -4,9 +4,14 @@ import { requireRole } from '../middleware/auth.js'
 
 const router = Router()
 
-// UC_08 ดูประชาสัมพันธ์ (ทุกคนดูได้ ไม่ต้องล็อกอิน) ใหม่สุดก่อน
+// UC_08 ดูประชาสัมพันธ์ (ทุกคนดูได้ ไม่ต้องล็อกอิน) ใหม่สุดก่อน ไม่แสดงประกาศของที่ส่งคืนแล้ว
 router.get('/', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM broadcasts ORDER BY created_at DESC')
+  const { rows } = await pool.query(
+    `SELECT b.* FROM broadcasts b
+     LEFT JOIN lost_items i ON i.id = b.item_id
+     WHERE i.id IS NULL OR i.status NOT IN ('returned', 'disputed')
+     ORDER BY b.created_at DESC`
+  )
   res.json({ broadcasts: rows })
 })
 
