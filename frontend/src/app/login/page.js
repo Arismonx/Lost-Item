@@ -1,10 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { postJson } from '../../lib/api';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
 
   async function handleSubmit(e) {
@@ -17,18 +16,29 @@ export default function LoginPage() {
     });
     if (!ok) return setError(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
     // officer/admin ไปแดชบอร์ด คนอื่นไปหน้าแรก
-    router.push(['officer', 'admin'].includes(data.user.role) ? '/dashboard' : '/');
-    router.refresh(); // ให้ Navbar โหลดข้อมูลผู้ใช้ใหม่
+    // โหลดหน้าใหม่ทั้งหมด เพื่อให้ Navbar และทุกหน้าโหลดข้อมูลผู้ใช้ใหม่
+    window.location.assign(['officer', 'admin'].includes(data.user.role) ? '/dashboard' : '/');
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">เข้าสู่ระบบ</h1>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-        <input name="email" type="email" required placeholder="อีเมล RU Mail" className="w-full rounded border px-3 py-2" />
-        <input name="password" type="password" required placeholder="รหัสผ่าน" className="w-full rounded border px-3 py-2" />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">เข้าสู่ระบบ</button>
+    <main className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="mb-4 text-center text-xl font-bold text-brand">เข้าสู่ระบบ</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="mb-1 block text-xs font-bold text-slate-700">อีเมล RU Mail</label>
+          <input name="email" type="email" required placeholder="student@rumail.ru.ac.th" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-bold text-slate-700">รหัสผ่าน</label>
+          <input name="password" type="password" required placeholder="รหัสผ่าน" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        </div>
+        {error && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
+        <button type="submit" className="w-full cursor-pointer rounded-xl bg-brand py-3 font-bold text-white shadow transition hover:bg-[#001c30]">เข้าสู่ระบบ</button>
+        <div className="pt-1 text-xs">
+          <Link href="/register" className="font-semibold text-brand hover:underline">
+            สมัครสมาชิกใหม่
+          </Link>
+        </div>
       </form>
     </main>
   );

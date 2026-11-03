@@ -3,14 +3,14 @@ import useRequireRole from '../../lib/useRequireRole';
 import { Fragment, useEffect, useState } from 'react';
 import { getJson, postJson, sendForm, checkImage, evidenceImageUrl } from '../../lib/api';
 
-const inputClass = 'w-full rounded border px-3 py-2';
+const inputClass = 'w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent';
 
 // ช่องเลือกรูปหลักฐาน (ไม่บังคับ)
 function ImageField({ label }) {
   return (
     <div>
-      <label className="text-sm text-gray-600">{label} (ไม่บังคับ, JPG/PNG/WebP ไม่เกิน 5 MB)</label>
-      <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" />
+      <label className="mb-1 block text-xs font-bold text-slate-700">{label} (ไม่บังคับ, JPG/PNG/WebP ไม่เกิน 5 MB)</label>
+      <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="block w-full text-xs file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-xs file:font-semibold hover:file:bg-slate-200" />
     </div>
   );
 }
@@ -20,9 +20,9 @@ function Evidence({ name, label }) {
   if (!name) return null;
   return (
     <a href={evidenceImageUrl(name)} target="_blank" rel="noreferrer" className="block">
-      <span>{label}:</span>
+      <span className="font-semibold">{label}:</span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={evidenceImageUrl(name)} alt={label} className="mt-1 max-h-40 rounded border" />
+      <img src={evidenceImageUrl(name)} alt={label} className="mt-1 max-h-40 rounded-xl border border-slate-200" />
     </a>
   );
 }
@@ -97,13 +97,16 @@ export default function ReturnsPage() {
   if (!allowed) return null;
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">ยืนยันการส่งมอบของหาย</h1>
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-      {message && <p className="mt-4 text-sm text-green-700">{message}</p>}
+    <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="text-xl font-bold text-brand">ยืนยันการส่งมอบของหาย</h1>
+        <p className="text-xs text-slate-500">บันทึกผู้รับคืน ผู้ส่งมอบ พยาน และรูปหลักฐาน</p>
+      </div>
+      {error && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
+      {message && <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">{message}</p>}
 
       {items && (
-        <form onSubmit={handleReturn} className="mt-4 space-y-3">
+        <form onSubmit={handleReturn} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <select name="item_id" required defaultValue="" className={inputClass}>
             <option value="" disabled>
               {items.length === 0 ? 'ไม่มีของที่รอรับคืน' : 'เลือกของหายที่จะส่งมอบ'}
@@ -119,17 +122,18 @@ export default function ReturnsPage() {
           <input name="sender_name" placeholder="ชื่อผู้ส่งมอบ (เจ้าหน้าที่)" className={inputClass} />
           <input name="witness_name" placeholder="ชื่อพยาน" className={inputClass} />
           <ImageField label="รูปหลักฐานการส่งมอบ" />
-          <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">ยืนยันส่งมอบ</button>
+          <button type="submit" className="cursor-pointer rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#001c30]">ยืนยันส่งมอบ</button>
         </form>
       )}
 
       {returns.length > 0 && (
         <>
-          <h2 className="mt-8 text-xl font-bold">ประวัติการส่งมอบ</h2>
-          <table className="mt-2 w-full text-left">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2">ของ</th>
+          <h2 className="text-lg font-bold text-brand">ประวัติการส่งมอบ</h2>
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-xs text-slate-500">
+              <tr>
+                <th className="px-4 py-3">ของ</th>
                 <th>ผู้รับ</th>
                 <th>สถานะ</th>
                 <th>การดำเนินการ</th>
@@ -138,29 +142,33 @@ export default function ReturnsPage() {
             <tbody>
               {returns.map((r) => (
                 <Fragment key={r.id}>
-                  <tr className="border-b align-top">
-                    <td className="py-2">{r.item_name}</td>
+                  <tr className="border-t border-slate-100 align-top">
+                    <td className="px-4 py-3 font-semibold text-brand">{r.item_name}</td>
                     <td>{r.receiver_name}</td>
-                    <td>{r.item_status === 'disputed' ? 'มีข้อโต้แย้ง' : 'คืนแล้ว'}</td>
-                    <td className="space-x-3">
-                      <button onClick={() => setOpenId(openId === r.id ? null : r.id)} className="text-blue-600 underline">
+                    <td>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${r.item_status === 'disputed' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {r.item_status === 'disputed' ? 'มีข้อโต้แย้ง' : 'คืนแล้ว'}
+                      </span>
+                    </td>
+                    <td className="space-x-3 pr-4 text-xs">
+                      <button onClick={() => setOpenId(openId === r.id ? null : r.id)} className="cursor-pointer font-semibold text-brand underline">
                         {openId === r.id ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
                       </button>
                       {r.item_status === 'returned' && !r.claimant_name && (
-                        <button onClick={() => setDisputeId(disputeId === r.id ? null : r.id)} className="text-red-600 underline">
+                        <button onClick={() => setDisputeId(disputeId === r.id ? null : r.id)} className="cursor-pointer font-semibold text-rose-600 underline">
                           แจ้งข้อโต้แย้ง
                         </button>
                       )}
                       {r.item_status === 'disputed' && (
-                        <button onClick={() => setResolveId(resolveId === r.id ? null : r.id)} className="text-green-700 underline">
+                        <button onClick={() => setResolveId(resolveId === r.id ? null : r.id)} className="cursor-pointer font-semibold text-emerald-700 underline">
                           ปิดข้อโต้แย้ง
                         </button>
                       )}
                     </td>
                   </tr>
                   {openId === r.id && (
-                    <tr className="border-b bg-gray-50">
-                      <td colSpan={4} className="space-y-1 p-3 text-sm">
+                    <tr className="border-t border-slate-100 bg-slate-50">
+                      <td colSpan={4} className="space-y-1 p-4 text-xs text-slate-700">
                         <p>ผู้รับคืน: {r.receiver_name} (ติดต่อ: {r.receiver_contact || '-'})</p>
                         <p>ผู้ส่งมอบ: {r.sender_name || '-'}</p>
                         <p>พยาน: {r.witness_name || '-'}</p>
@@ -168,13 +176,13 @@ export default function ReturnsPage() {
                         <p>วันเวลาที่ส่งมอบ: {new Date(r.returned_at).toLocaleString('th-TH')}</p>
                         <Evidence name={r.proof_image} label="รูปหลักฐานการส่งมอบ" />
                         {r.claimant_name && (
-                          <p className="text-red-600">
+                          <p className="text-rose-600">
                             ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail} ({new Date(r.disputed_at).toLocaleString('th-TH')})
                           </p>
                         )}
                         <Evidence name={r.dispute_image} label="รูปหลักฐานของผู้โต้แย้ง" />
                         {r.resolved_at && (
-                          <p className="text-green-700">
+                          <p className="text-emerald-700">
                             ผลการเจรจา: {r.resolution} ({new Date(r.resolved_at).toLocaleString('th-TH')})
                           </p>
                         )}
@@ -182,26 +190,26 @@ export default function ReturnsPage() {
                     </tr>
                   )}
                   {resolveId === r.id && (
-                    <tr className="border-b">
-                      <td colSpan={4} className="p-3">
+                    <tr className="border-t border-slate-100">
+                      <td colSpan={4} className="p-4">
                         <form onSubmit={(e) => handleResolve(e, r.id)} className="space-y-2">
-                          <p className="text-sm text-red-600">
+                          <p className="text-xs text-rose-600">
                             ข้อโต้แย้ง: {r.claimant_name} - {r.dispute_detail}
                           </p>
                           <textarea name="resolution" required placeholder="ผลการเจรจา เช่น ผู้รับเดิมเป็นเจ้าของจริง" className={inputClass} />
-                          <button type="submit" className="rounded bg-green-700 px-3 py-1 text-white hover:bg-green-800">บันทึกและปิดข้อโต้แย้ง</button>
+                          <button type="submit" className="cursor-pointer rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800">บันทึกและปิดข้อโต้แย้ง</button>
                         </form>
                       </td>
                     </tr>
                   )}
                   {disputeId === r.id && (
-                    <tr className="border-b">
-                      <td colSpan={4} className="p-3">
+                    <tr className="border-t border-slate-100">
+                      <td colSpan={4} className="p-4">
                         <form onSubmit={(e) => handleDispute(e, r.id)} className="space-y-2">
                           <input name="claimant_name" required placeholder="ชื่อผู้โต้แย้ง" className={inputClass} />
                           <textarea name="new_detail" required placeholder="รายละเอียดที่อ้างเป็นเจ้าของ" className={inputClass} />
                           <ImageField label="รูปหลักฐานของผู้โต้แย้ง" />
-                          <button type="submit" className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700">บันทึกข้อโต้แย้ง</button>
+                          <button type="submit" className="cursor-pointer rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700">บันทึกข้อโต้แย้ง</button>
                         </form>
                       </td>
                     </tr>
@@ -210,6 +218,7 @@ export default function ReturnsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </>
       )}
     </main>

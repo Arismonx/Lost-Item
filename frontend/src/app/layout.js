@@ -45,11 +45,14 @@ async function NavbarWithUser() {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex min-h-screen flex-col">
         <Suspense fallback={<Navbar user={null} />}>
           <NavbarWithUser />
         </Suspense>
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-white/10 bg-brand py-4 text-center text-xs text-slate-400">
+          ภาควิชาวิทยาการคอมพิวเตอร์ คณะวิทยาศาสตร์ มหาวิทยาลัยรามคำแหง • วิชา COS4101
+        </footer>
       </body>
     </html>
   );

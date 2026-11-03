@@ -47,7 +47,10 @@
 ## สถานะ / TODO
 
 - Navbar รับ prop `user` (`{ name, role }` หรือ `null`) – layout ดึงจาก backend `/api/auth/me` ผ่าน cookie `token` แล้ว
-- สร้างหน้าครบทุกเมนูแล้ว แต่เป็นหน้าเปล่า/ข้อมูลตัวอย่าง ฟอร์มยังไม่ส่งข้อมูล ยังไม่มีฐานข้อมูล
+- ระบบหลัก UC_01–UC_09 ทำครบและต่อ backend/DB จริงแล้ว รวมอัปโหลดรูปของหาย (`/uploads/items` สาธารณะ) และรูปหลักฐานส่งมอบ/โต้แย้ง (`/api/returns/images/:name` เฉพาะ officer/admin) รายละเอียดดู `docs/PROGRESS.md`
+- **Branch ปัจจุบัน: `ui-work`** (แตกจาก commit `0ff1f40`) กำลังปรับ UI ต่อ ให้ commit ลง branch นี้ ห้าม merge `main` เข้ามา
+- **ไม่ใช้ระบบลืมรหัสผ่านทางอีเมล** (หน้า `/forgot-password`, `/reset-password`, `mailer.js`, ตาราง `password_resets`) โค้ดนั้นอยู่ที่ `main` (commit `f44d01a`, `6eefe73`) และ tag `v1-with-email-reset` เท่านั้น ห้าม cherry-pick/merge เข้า `ui-work` ถ้าจะทำลืมรหัสผ่านใหม่ ให้ทำแบบแอดมินรีเซ็ตให้ที่ `/admin/users` (ยังไม่ได้ทำ) ตอนรวมเข้า `main` ต้อง `git revert` สอง commit นั้นก่อน
+- ตาราง `password_resets` ที่ค้างใน DB ไม่มีผลต่อโค้ดเวอร์ชันนี้ ไม่ต้องลบ
 - แต่ละหน้า = โฟลเดอร์ใน `src/app/<ชื่อ>/page.js` (App Router)
 - สมัครสมาชิกต้องจำกัดเฉพาะอีเมล RU Mail
 

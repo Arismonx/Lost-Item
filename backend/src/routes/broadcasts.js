@@ -4,9 +4,14 @@ import { requireRole } from '../middleware/auth.js'
 
 const router = Router()
 
-// UC_08 ดูประชาสัมพันธ์ (ทุกคนดูได้ ไม่ต้องล็อกอิน) ใหม่สุดก่อน
+// UC_08 ดูประชาสัมพันธ์ (ทุกคนดูได้ ไม่ต้องล็อกอิน) ใหม่สุดก่อน ไม่แสดงประกาศของที่ส่งคืนแล้ว
 router.get('/', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM broadcasts ORDER BY created_at DESC')
+  const { rows } = await pool.query(
+    `SELECT b.* FROM broadcasts b
+     LEFT JOIN lost_items i ON i.id = b.item_id
+     WHERE i.id IS NULL OR i.status NOT IN ('returned', 'disputed')
+     ORDER BY b.created_at DESC`
+  )
   res.json({ broadcasts: rows })
 })
 
@@ -31,6 +36,13 @@ router.post('/', requireRole('officer', 'admin'), async (req, res) => {
     }
     throw err
   }
+})
+
+// UC_08 ลบประชาสัมพันธ์ (เฉพาะเจ้าหน้าที่/แอดมิน) ลบแค่ประกาศ ไม่แตะของหายที่ผูกอยู่
+router.delete('/:id', requireRole('officer', 'admin'), async (req, res) => {
+  const { rowCount } = await pool.query('DELETE FROM broadcasts WHERE id = $1', [req.params.id])
+  if (rowCount === 0) return res.status(404).json({ error: 'ไม่พบประชาสัมพันธ์นี้' })
+  res.json({ ok: true })
 })
 
 export default router
