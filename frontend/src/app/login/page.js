@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { postJson } from '../../lib/api';
 
@@ -31,7 +30,6 @@ export default function LoginPage() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">เข้าสู่ระบบ</button>
       </form>
-      <Link href="/forgot-password" className="mt-4 inline-block text-sm text-blue-600 underline">ลืมรหัสผ่าน?</Link>
     </main>
   );
 }
