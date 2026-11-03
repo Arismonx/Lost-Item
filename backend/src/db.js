@@ -68,18 +68,6 @@ export async function initDb() {
   await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolution TEXT`)
   await pool.query(`ALTER TABLE disputes ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ`)
 
-  // โทเค็นรีเซ็ตรหัสผ่าน เก็บเฉพาะค่า hash (SHA-256) ของโทเค็น ใช้ได้ครั้งเดียวและหมดอายุ
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS password_resets (
-      id         SERIAL PRIMARY KEY,
-      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      token_hash TEXT NOT NULL UNIQUE,
-      expires_at TIMESTAMPTZ NOT NULL,
-      used_at    TIMESTAMPTZ,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    )
-  `)
-
   // ตารางประชาสัมพันธ์ (UC_08) item_id ว่างได้ = ประกาศทั่วไปที่ไม่ผูกกับของชิ้นใด
   await pool.query(`
     CREATE TABLE IF NOT EXISTS broadcasts (
