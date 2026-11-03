@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { postJson } from '../../lib/api';
 
@@ -26,20 +27,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">ลงทะเบียน</h1>
-      <p className="text-sm text-gray-500">ใช้ได้เฉพาะอีเมล RU Mail เท่านั้น</p>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+    <main className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="text-center text-xl font-bold text-brand">ลงทะเบียนใช้งานระบบ</h1>
+      <p className="mb-4 text-center text-xs text-slate-500">ใช้ได้เฉพาะอีเมล RU Mail เท่านั้น</p>
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex gap-3">
-          <input name="firstName" required placeholder="ชื่อ" className="w-full rounded border px-3 py-2" />
-          <input name="lastName" required placeholder="นามสกุล" className="w-full rounded border px-3 py-2" />
+          <input name="firstName" required placeholder="ชื่อ" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+          <input name="lastName" required placeholder="นามสกุล" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
         </div>
-        <input name="email" type="email" required placeholder="อีเมล RU Mail" className="w-full rounded border px-3 py-2" />
-        <input name="contact" required placeholder="ช่องทางติดต่อ (เบอร์โทร / LINE)" className="w-full rounded border px-3 py-2" />
-        <input name="password" type="password" required minLength={8} placeholder="รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" className="w-full rounded border px-3 py-2" />
-        <input name="confirmPassword" type="password" required minLength={8} placeholder="ยืนยันรหัสผ่าน" className="w-full rounded border px-3 py-2" />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">ลงทะเบียน</button>
+        <input name="email" type="email" required placeholder="อีเมล RU Mail (@rumail.ru.ac.th)" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        <input name="contact" required placeholder="ช่องทางติดต่อ (เบอร์โทร / LINE)" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        <input name="password" type="password" required minLength={8} placeholder="รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        <input name="confirmPassword" type="password" required minLength={8} placeholder="ยืนยันรหัสผ่าน" className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-accent" />
+        {error && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
+        <button type="submit" className="w-full cursor-pointer rounded-xl bg-brand py-3 font-bold text-white shadow transition hover:bg-[#001c30]">ยืนยันการสมัคร</button>
+        <Link href="/login" className="inline-block text-xs font-semibold text-brand hover:underline">
+          ← กลับไปหน้าเข้าสู่ระบบ
+        </Link>
       </form>
     </main>
   );
